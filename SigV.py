@@ -18,6 +18,8 @@ import time as t
 from scipy import signal
 import matplotlib.pyplot as plt
 import random
+from PyQt5.QtGui import QPixmap
+
 
 
 
@@ -38,6 +40,11 @@ class mainWindow(QtWidgets.QMainWindow) :
         self.KeyDownMethod = None
         self.KeyLeftMethod = None
         self.KeyRightMethod = None
+        self.spaceMethod = None
+        self.number_1_method = None
+        self.number_2_method = None
+        self.number_3_method = None
+        self.windowResizeMethod = None
     
     def keyPressEvent(self, ev) :
         if ev.key() == Qt.Key_Up : 
@@ -48,6 +55,17 @@ class mainWindow(QtWidgets.QMainWindow) :
             self.KeyLeftMethod(ev)
         if ev.key() == Qt.Key_Right : 
             self.KeyRightMethod(ev)
+        if ev.key() == Qt.Key_Space : 
+            self.spaceMethod(ev)
+        if ev.key() == Qt.Key_1 : 
+            self.number_1_method(ev) 
+        if ev.key() == Qt.Key_2 :
+            self.number_2_method(ev)
+        if ev.key() == Qt.Key_3 : 
+            self.number_3_method(ev)
+    def resizeEvent(self, ev) : 
+        self.windowResizeMethod(ev)
+
 
 
 
@@ -57,6 +75,7 @@ class Ui_SignalViewer(object):
     def __init__(self):
         self.selectedSignal = 0
         self.fileNames = None
+        self.isPaused = False
 
         self.plotIndex1 = 200
         self.xPointer1  = 0
@@ -95,32 +114,27 @@ class Ui_SignalViewer(object):
 
     def setupUi(self, SignalViewer):
         SignalViewer.setObjectName("SignalViewer")
-        SignalViewer.setFixedWidth(1350)
-        SignalViewer.setFixedHeight(690)
+        SignalViewer.resize(1350, 690)
+        # SignalViewer.setFixedWidth(1350)
+        # SignalViewer.setFixedHeight(690)
         SignalViewer.setTabShape(QtWidgets.QTabWidget.Triangular)
         SignalViewer.KeyUpMethod = self.key_up
-        SignalViewer.KeyDownMethod = self.key_down      
+        SignalViewer.KeyDownMethod = self.key_down    
         SignalViewer.KeyLeftMethod = self.key_left
         SignalViewer.KeyRightMethod = self.key_right
+        SignalViewer.spaceMethod = self.spaceClicked
+        SignalViewer.number_1_method = self.number_1_clicked
+        SignalViewer.number_2_method = self.number_2_clicked
+        SignalViewer.number_3_method = self.number_3_clicked
+        SignalViewer.windowResizeMethod = self.windowResize
         
         self.centralwidget = QtWidgets.QWidget(SignalViewer)
         self.centralwidget.setObjectName("centralwidget")
         SignalViewer.setCentralWidget(self.centralwidget)
-
-        # scroll bar
-        scrollArea = QtWidgets.QScrollArea()
-        content_widget = QtWidgets.QWidget()
-        scrollArea.setWidget(content_widget)
-        scrollArea.setWidgetResizable(True)
-        lay = QtWidgets.QVBoxLayout(content_widget)        
+        
 
         self.menubar = QtWidgets.QMenuBar(SignalViewer)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 802, 27))
-        font = QtGui.QFont()
-        font.setFamily("Segoe Print")
-        font.setBold(True)
-        font.setWeight(75)
-        self.menubar.setFont(font)
         self.menubar.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
         self.menubar.setAutoFillBackground(True)
         self.menubar.setStyleSheet("")
@@ -158,6 +172,9 @@ class Ui_SignalViewer(object):
         self.actionzoom_in_h.setIcon(icon1)
         self.actionzoom_in_h.setObjectName("actionzoom_in_h")
         self.actionzoom_in_h.triggered.connect(self.zoom_in_h)
+        self.shortcutZoom_in_h = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+H"),SignalViewer)
+        self.shortcutZoom_in_h.activated.connect(self.zoom_in_h)
+        self.actionzoom_in_h.setEnabled(False)
         # zoom out H 
         self.actionzoom_out_h = QtWidgets.QAction(SignalViewer)
         icon1 = QtGui.QIcon()
@@ -165,6 +182,9 @@ class Ui_SignalViewer(object):
         self.actionzoom_out_h.setIcon(icon1)
         self.actionzoom_out_h.setObjectName("actionzoom_out_h")
         self.actionzoom_out_h.triggered.connect(self.zoom_out_h)
+        self.shortcutZoom_out_h = QtWidgets.QShortcut(QtGui.QKeySequence("Shift+H"),SignalViewer)
+        self.shortcutZoom_out_h.activated.connect(self.zoom_out_h)
+        self.actionzoom_out_h.setEnabled(False)
         # zoom in v 
         self.actionzoom_in_v = QtWidgets.QAction(SignalViewer)
         icon1 = QtGui.QIcon()
@@ -172,6 +192,9 @@ class Ui_SignalViewer(object):
         self.actionzoom_in_v.setIcon(icon1)
         self.actionzoom_in_v.setObjectName("actionzoom_in_v")
         self.actionzoom_in_v.triggered.connect(self.zoom_in_v)
+        self.shortcutZoom_in_v = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+V"),SignalViewer)
+        self.shortcutZoom_in_v.activated.connect(self.zoom_in_v)
+        self.actionzoom_in_v.setEnabled(False)
         # zoom out v 
         self.actionzoom_out_v = QtWidgets.QAction(SignalViewer)
         icon1 = QtGui.QIcon()
@@ -179,6 +202,9 @@ class Ui_SignalViewer(object):
         self.actionzoom_out_v.setIcon(icon1)
         self.actionzoom_out_v.setObjectName("actionzoom_out_v")
         self.actionzoom_out_v.triggered.connect(self.zoom_out_v)
+        self.shortcutZoom_out_v = QtWidgets.QShortcut(QtGui.QKeySequence("Shift+V"),SignalViewer)
+        self.shortcutZoom_out_v.activated.connect(self.zoom_out_v)
+        self.actionzoom_out_v.setEnabled(False)
 
         #pause 
         self.actionPause = QtWidgets.QAction(SignalViewer)
@@ -187,6 +213,7 @@ class Ui_SignalViewer(object):
         self.actionPause.setIcon(icon1)
         self.actionPause.setObjectName("actionPause")
         self.actionPause.triggered.connect(self.pause)
+        self.actionPause.setEnabled(False)
 
         #resume
         self.actionResume = QtWidgets.QAction(SignalViewer)
@@ -195,7 +222,7 @@ class Ui_SignalViewer(object):
         self.actionResume.setIcon(icon1)
         self.actionResume.setObjectName("actionPause")
         self.actionResume.triggered.connect(self.resume)
-
+        self.actionResume.setEnabled(False)
         #save file
         self.actionsave_file = QtWidgets.QAction(SignalViewer)
         icon3 = QtGui.QIcon()
@@ -203,7 +230,16 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setIcon(icon3)
         self.actionsave_file.setObjectName("actionsave_file")
         self.actionsave_file.triggered.connect(self.generateReport)
+        self.actionsave_file.setEnabled(False)
 
+        #background
+        self.backGround = QtWidgets.QLabel("")
+        self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
+        self.backGround.setParent(SignalViewer)
+        pixmap = QPixmap('BackGround.PNG')
+        self.backGround.setPixmap(pixmap)
+        self.backGround.setScaledContents(True)
+        self.backGround.show()
         # select Folder
         self.actionChoose_File = QtWidgets.QAction(SignalViewer)
         self.actionChoose_File.setObjectName("actionChoose_File")
@@ -213,13 +249,13 @@ class Ui_SignalViewer(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.toolBar_2.addSeparator()
         self.toolBar_2.addAction(self.actionnew_file)
+        self.toolBar_2.addAction(self.actionsave_file)
         self.toolBar_2.addAction(self.actionzoom_in_h)
         self.toolBar_2.addAction(self.actionzoom_out_h)
         self.toolBar_2.addAction(self.actionzoom_in_v)
         self.toolBar_2.addAction(self.actionzoom_out_v)
         self.toolBar_2.addAction(self.actionPause)  
         self.toolBar_2.addAction(self.actionResume)
-        self.toolBar_2.addAction(self.actionsave_file)
 
         #signal 1 == channel 1
         self.channelLabel1 = QtWidgets.QLabel("Channel 1")
@@ -229,7 +265,7 @@ class Ui_SignalViewer(object):
         self.channelLabel1.setObjectName("channelLabel1")
 
         self.signal1 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal1.setGeometry(QtCore.QRect(5, 30,int((1350 - 20) / 2 ),170))
+        self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
         self.signal1.setObjectName("signal1")
             # label to cover channel 1 
         self.labelForSignal1 = clickableLabel()
@@ -322,15 +358,62 @@ class Ui_SignalViewer(object):
         self.toolBar.setWindowTitle(_translate("SignalViewer", "toolBar"))
         self.toolBar_2.setWindowTitle(_translate("SignalViewer", "toolBar_2"))
         self.actionnew_file.setText(_translate("SignalViewer", "newfile"))
+        self.actionnew_file.setShortcut(_translate("SignalViewer","Ctrl+N"))
         self.actionzoom_in_h.setText(_translate("SignalViewer", "zoom in horizontally"))
+        self.actionzoom_in_h.setShortcut(_translate("SignalViewer", "Ctrl+H+Plus"))
         self.actionzoom_out_h.setText(_translate("SignalViewer", "zoom out horizontally"))
+        self.actionzoom_out_h.setShortcut(_translate("SignalViewer", "Ctrl+Minus+H"))
         self.actionzoom_in_v.setText(_translate("SignalViewer", "zoom in virtically"))
+        self.actionzoom_in_v.setShortcut(_translate("SignalViewer", "Ctrl+Plus+V"))
         self.actionzoom_out_v.setText(_translate("SignalViewer", "zoom out virtically"))
+        self.actionzoom_out_v.setShortcut(_translate("SignalViewer", "Ctrl+Minus+V"))
         self.actionPause.setText(_translate("SignalViewer", "Pause"))
         self.actionResume.setText(_translate("SignalViewer", "Resume"))
         self.actionsave_file.setText(_translate("SignalViewer", "save file"))
         self.actionsave_file.setShortcut(_translate("SignalViewer", "Ctrl+S"))
         self.actionChoose_File.setText(_translate("SignalViewer", "Choose File"))
+    
+    def windowResize(self,event) : 
+        self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
+        self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
+        self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
+        self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
+        self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
+        self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
+
+
+    def enableWidgets(self) : 
+        self.backGround.hide()
+        self.actionPause.setEnabled(True)
+        self.actionResume.setEnabled(True)
+        self.actionzoom_in_h.setEnabled(True)
+        self.actionzoom_in_v.setEnabled(True)
+        self.actionzoom_out_h.setEnabled(True)
+        self.actionzoom_out_v.setEnabled(True)
+        self.actionsave_file.setEnabled(True)
+    
+    def spaceClicked(self,ev) : 
+        if self.selectedSignal == 0 :
+            self.warnDialog("please Select Signal")
+        else : 
+            if self.isPaused : 
+                self.resume()
+                self.isPaused = not self.isPaused
+            else : 
+                self.pause()
+                self.isPaused = not self.isPaused
+
+
+    def number_1_clicked(self,ev) : 
+        self.selectedSignal = 1 
+
+    def number_2_clicked(self,ev) : 
+        self.selectedSignal = 2
+    
+    def number_3_clicked(self,ev) : 
+        self.selectedSignal = 3
+
+
 
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
@@ -338,12 +421,12 @@ class Ui_SignalViewer(object):
         directory = dialog.getOpenFileNames(None,'select file','c:\\','csv files (*.csv)')
         self.fileNames = directory[0]
 
-
-        if len(self.fileNames) == 0 : self.warnDialog("please Select data files") 
-        if len(self.fileNames) >= 4 : 
+        if len(self.fileNames) == 0 : self.warnDialog("please Select data files")
+        if len(self.fileNames) >= 4 :
             self.warnDialog("please Select 3 files or less")
 
         if len(self.fileNames) == 3 :
+            self.enableWidgets()
             #read 3 files
             csvFile1 = pd.read_csv(self.fileNames[0])
             csvFile2 = pd.read_csv(self.fileNames[1])
@@ -353,7 +436,7 @@ class Ui_SignalViewer(object):
             self.time1 = csvFile1.iloc[:,0]
             self.volts1 = csvFile1.iloc[:,1]
             self.sampleTime1 = self.time1[1] - self.time1[0]
-            self.scrollStep1 = 0.01
+            self.scrollStep1 = 10 * self.sampleTime1
             #plot spectogram
             self.drawSpectoForSignal1(self.signal4, self.volts1, 1 / self.sampleTime1)
             # plot the signal 
@@ -367,7 +450,7 @@ class Ui_SignalViewer(object):
             self.time2 = csvFile2.iloc[:,0]
             self.volts2 = csvFile2.iloc[:,1]
             self.sampleTime2 = self.time2[1] - self.time2[0]
-            self.scrollStep2 = 0.01
+            self.scrollStep2 = 10 * self.sampleTime2
             #plot spectogram
             self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
             # plot the signal 
@@ -381,7 +464,7 @@ class Ui_SignalViewer(object):
             self.time3 = csvFile3.iloc[:,0]
             self.volts3 = csvFile3.iloc[:,1]
             self.sampleTime3 = self.time3[1] - self.time3[0]
-            self.scrollStep3 = 0.01
+            self.scrollStep3 = 10 * self.sampleTime3
             #plot spectogram
             self.drawSpectoForSignal1(self.signal6, self.volts3, 1 / self.sampleTime3)
             # plot the signal 
@@ -392,6 +475,7 @@ class Ui_SignalViewer(object):
             self.timer3.start(50)
 
         if len(self.fileNames) == 2 : 
+            self.enableWidgets()
             #read 2 files
             csvFile1 = pd.read_csv(self.fileNames[0])
             csvFile2 = pd.read_csv(self.fileNames[1])
@@ -424,6 +508,7 @@ class Ui_SignalViewer(object):
             self.timer2.timeout.connect(self.update2)
             self.timer2.start(50)
         if len(self.fileNames) == 1 : 
+            self.enableWidgets()
             #read 1 file
             csvFile1 = pd.read_csv(self.fileNames[0])
             # exctract data to draw signal 1 
@@ -474,7 +559,7 @@ class Ui_SignalViewer(object):
                 fig.suptitle('Axes values are scaled individually by default')
 
                 ax1.plot(self.time1, self.volts1, color="rEd")
-                p, f, t, sxx = ax2.specgram(self.volts1,int(1 / self.sampleTime1) )
+                ax2.specgram(self.volts1,int(1 / self.sampleTime1))
 
                 ax3.plot(self.time2, self.volts2, color="magenta")
                 ax4.specgram(self.volts2, int(1 / self.sampleTime2))
@@ -506,14 +591,14 @@ class Ui_SignalViewer(object):
                 fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
                 window = QtWidgets.QMessageBox()
                 window.setWindowTitle("done")
-                window.setText("file has been saved as report.pdf in your current directory")
+                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
             if len(self.fileNames) == 2 : 
                 fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
                 fig.suptitle('Axes values are scaled individually by default')
 
                 ax1.plot(self.time1, self.volts1, color="rEd")
-                p, f, t, sxx = ax2.specgram(self.volts1, int(1 / self.sampleTime1) )
+                ax2.specgram(self.volts1, int(1 / self.sampleTime1) )
 
                 ax3.plot(self.time2, self.volts2, color="magenta")
                 ax4.specgram(self.volts2, int(1 / self.sampleTime2))
@@ -545,7 +630,7 @@ class Ui_SignalViewer(object):
                 fig.suptitle('Axes values are scaled individually by default')
 
                 ax1.plot(self.time1, self.volts1, color="rEd")
-                p, f, t, sxx = ax2.specgram(self.volts1, int(1 / self.sampleTime1) )
+                ax2.specgram(self.volts1, int(1 / self.sampleTime1))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
@@ -565,31 +650,7 @@ class Ui_SignalViewer(object):
                 window.setWindowTitle("done")
                 window.setText("file has been saved as report.pdf in your current directory")
                 window.exec_()
-    def drawSpectoForSignal1(self,GView,y,freq) : 
-        
-        f, t, Sxx = signal.spectrogram(y, freq)
-        pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
-
-        win = GView
-        p1 = win.addPlot()
-        
-        img = pyqtgraph.ImageItem()
-        p1.addItem(img)
-        hist = pyqtgraph.HistogramLUTItem()
-        hist.setImageItem(img)
-        win.addItem(hist)
-        hist.setLevels(np.min(Sxx), np.max(Sxx))
-        hist.gradient.restoreState({
-            'mode':
-            'rgb',
-            'ticks': [(0.5, (0, 182, 188, 255)), (1.0, (246, 111, 0, 255)),
-                      (0.0, (75, 0, 113, 255))]
-        })
-        img.setImage(Sxx)
-        img.scale(t[-1] / np.size(Sxx, axis=1), f[-1] / np.size(Sxx, axis=0))
-        p1.setLimits(xMin=0, xMax=t[-1], yMin=0, yMax=f[-1])
-        p1.setLabel('bottom', "Time", units='s')
-        p1.setLabel('left', "Frequency", units='Hz')
+    
 
     def pause(self) :
         if self.selectedSignal == 0 : self.warnDialog("please choose signal")
@@ -610,11 +671,6 @@ class Ui_SignalViewer(object):
                 timer.start()
         
         
-
-
-
-        
-
     def warnDialog(self,message):
         window = QtWidgets.QMessageBox()
         window.setWindowTitle("error")
@@ -624,10 +680,10 @@ class Ui_SignalViewer(object):
     def signal1Clicked(self) : 
         self.selectedSignal = 1
 
-    def signal2Clicked(self) : 
+    def signal2Clicked(self) :
         self.selectedSignal = 2
     
-    def signal3Clicked(self) : 
+    def signal3Clicked(self) :
         self.selectedSignal = 3
         
     def zoom_in_h(self) :
@@ -731,6 +787,32 @@ class Ui_SignalViewer(object):
                     rangeOfX[0] += getattr(self, "scrollStep" + str(self.selectedSignal))
                     rangeOfX[1] += getattr(self, "scrollStep" + str(self.selectedSignal))
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
+
+    def drawSpectoForSignal1(self,GView,y,freq) : 
+        
+        f, t, Sxx = signal.spectrogram(y, freq)
+        pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
+
+        win = GView
+        p1 = win.addPlot()
+
+        img = pyqtgraph.ImageItem()
+        p1.addItem(img)
+        hist = pyqtgraph.HistogramLUTItem()
+        hist.setImageItem(img)
+        win.addItem(hist)
+        hist.setLevels(np.min(Sxx), np.max(Sxx))
+        hist.gradient.restoreState({
+            'mode':
+            'rgb',
+            'ticks': [(0.5, (0, 182, 188, 255)), (1.0, (246, 111, 0, 255)),
+                      (0.0, (75, 0, 113, 255))]
+        })
+        img.setImage(Sxx)
+        img.scale(t[-1] / np.size(Sxx, axis=1), f[-1] / np.size(Sxx, axis=0))
+        p1.setLimits(xMin=0, xMax=t[-1], yMin=0, yMax=f[-1])
+        p1.setLabel('bottom', "Time", units='s')
+        p1.setLabel('left', "Frequency", units='Hz')
 
     def key_up(self,ev) : 
         self.scroll_up()
