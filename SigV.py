@@ -76,21 +76,25 @@ class Ui_SignalViewer(object):
         self.selectedSignal = 0
         self.fileNames = None
         self.isPaused = False
+        self.activePlots = []
 
         self.plotIndex1 = 200
         self.xPointer1  = 0
         self.plot1 = None
-        self.scrollStep1 = None
+        self.scrollStep1_x = None
+        self.scrollStep1_y = None
 
         self.plotIndex2 = 200
         self.xPointer2  = 0
         self.plot2 = None
-        self.scrollStep2 = None
+        self.scrollStep2_x = None
+        self.scrollStep2_y = None
 
         self.plotIndex3 = 200
         self.xPointer3  = 0
         self.plot3 = None
-        self.scrollStep3 = None
+        self.scrollStep3_x = None
+        self.scrollStep3_y = None
 
         self.xRangeStack1 = []
         self.yRangeStack1 = []
@@ -431,12 +435,15 @@ class Ui_SignalViewer(object):
     def clearSignal(self) :
         if self.selectedSignal == 0 : self.warnDialog("please select signal")
         else : 
+            activePlots = getattr(self, "activePlots")
+            index = activePlots.remove(self.selectedSignal)
             getattr(getattr(self,"signal" + str(self.selectedSignal)) , "clear")() # self.signal1.clear()
             getattr(getattr(self,"signal" + str(self.selectedSignal + 3)) , "clear")() # self.signal1.clear()
             setattr(self, "plotIndex" + str(self.selectedSignal), 200)     # self.plotIndex = 200
             setattr(self, "xPointer" + str(self.selectedSignal), 0)        # self.xPointer  = 0
             setattr(self, "plot" + str(self.selectedSignal), None)         # self.plot = None
-            setattr(self, "scrollStep" + str(self.selectedSignal), None)   # self.scrollStep = None
+            setattr(self, "scrollStep" + str(self.selectedSignal) + "_x", None)   # self.scrollStep_x = None
+            setattr(self, "scrollStep" + str(self.selectedSignal) + "_y", None)   # self.scrollStep_y = None
             setattr(self, "xRangeStack" + str(self.selectedSignal), [])    # self.xRangeStack = []
             setattr(self, "yRangeStack", [])                               # self.yRangeStack = []
             setattr(self, "xRangeOfSignal" + str(self.selectedSignal), []) # self.xRangeOfSignal = []
@@ -459,13 +466,16 @@ class Ui_SignalViewer(object):
             return
         if(self.plot1 == None) :
             self.enableWidgets()
+            self.activePlots.append(1)
             # read csv file 
             csvFile1 = pd.read_csv(fileName)
             # exctract data to draw signal 1
             self.time1 = csvFile1.iloc[:,0]
             self.volts1 = csvFile1.iloc[:,1]
             self.sampleTime1 = self.time1[1] - self.time1[0]
-            self.scrollStep1 = 10 * self.sampleTime1
+            yrange = self.volts1[len(self.volts1) - 1] - self.volts1[0]
+            self.scrollStep1_x = 10 * self.sampleTime1
+            self.scrollStep1_y = yrange / 10
             #plot spectogram
             self.drawSpectoForSignal1(self.signal4, self.volts1, 1 / self.sampleTime1)
             # plot the signal 
@@ -473,17 +483,20 @@ class Ui_SignalViewer(object):
             self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
             self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
             self.timer1.timeout.connect(self.update1)
-            self.timer1.start(1)
+            self.timer1.start(50)
         else : 
             if self.plot2 == None : 
                 self.enableWidgets()
+                self.activePlots.append(2)
                 # read csv file
                 csvFile2 = pd.read_csv(fileName)
                 # exctract data to plot the signal 
                 self.time2 = csvFile2.iloc[:,0]
                 self.volts2 = csvFile2.iloc[:,1]
+                yrange = self.volts2[len(self.volts2) - 1] - self.volts2[0]
                 self.sampleTime2 = self.time2[1] - self.time2[0]
-                self.scrollStep2 = 10 * self.sampleTime2
+                self.scrollStep2_x = 10 * self.sampleTime2
+                self.scrollStep2_y = yrange / 10
                 #plot spectogram
                 self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
                 # plot the signal 
@@ -491,17 +504,20 @@ class Ui_SignalViewer(object):
                 self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
                 self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
                 self.timer2.timeout.connect(self.update2)
-                self.timer2.start(1)
+                self.timer2.start(50)
             else : 
                 if self.plot3 == None : 
                     self.enableWidgets()
+                    self.activePlots.append(3)
                     # read csv file
                     csvFile3 = pd.read_csv(fileName)
                     # exctract data to draw signal 3
                     self.time3 = csvFile3.iloc[:,0]
                     self.volts3 = csvFile3.iloc[:,1]
+                    yrange = self.volts3[len(self.volts3) - 1] - self.volts3[0]
                     self.sampleTime3 = self.time3[1] - self.time3[0]
-                    self.scrollStep3 = 10 * self.sampleTime3
+                    self.scrollStep3_x = 10 * self.sampleTime3
+                    self.scrollStep3_y = yrange / 10
                     #plot spectogram
                     self.drawSpectoForSignal1(self.signal6, self.volts3, 1 / self.sampleTime3)
                     # plot the signal 
@@ -509,7 +525,7 @@ class Ui_SignalViewer(object):
                     self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
                     self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
                     self.timer3.timeout.connect(self.update3)
-                    self.timer3.start(1)
+                    self.timer3.start(50)
                 else : 
                     self.warnDialog("please clear one of the signals first")
           
@@ -539,8 +555,7 @@ class Ui_SignalViewer(object):
         self.plot3.plot(self.time3[0:self.plotIndex3],self.volts3[0:self.plotIndex3])
         
     def generateReport(self) : 
-        if self.fileNames != None : 
-            if len(self.fileNames) == 3 : 
+            if len(self.activePlots) == 3: 
                 fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(6)
                 fig.suptitle('Axes values are scaled individually by default')
 
@@ -579,15 +594,26 @@ class Ui_SignalViewer(object):
                 window.setWindowTitle("done")
                 window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
-            if len(self.fileNames) == 2 : 
+            if  len(self.activePlots) == 2 : 
                 fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
                 fig.suptitle('Axes values are scaled individually by default')
 
-                ax1.plot(self.time1, self.volts1, color="rEd")
-                ax2.specgram(self.volts1, int(1 / self.sampleTime1) )
+                plotNumber1 = self.activePlots[0] 
+                plotNumber2 = self.activePlots[1]
+                
+                time1 = getattr(self,"time" + str(plotNumber1))
+                volts1 = getattr(self,"volts" + str(plotNumber1))
+                sampleTime1 = getattr(self, "sampleTime" + str(plotNumber1))
 
-                ax3.plot(self.time2, self.volts2, color="magenta")
-                ax4.specgram(self.volts2, int(1 / self.sampleTime2))
+                time2 = getattr(self,"time" + str(plotNumber2))
+                volts2 = getattr(self,"volts" + str(plotNumber2))
+                sampleTime2 = getattr(self, "sampleTime" + str(plotNumber2))
+                # ax1.plot(self.time1, self.volts1, color="rEd")
+                ax1.plot(time1, volts1, color="rEd")
+                ax2.specgram(volts1, int(1 / sampleTime1) )
+
+                ax3.plot(time2, volts2, color="magenta")
+                ax4.specgram(volts2, int(1 / sampleTime2))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
@@ -609,14 +635,19 @@ class Ui_SignalViewer(object):
                 fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
                 window = QtWidgets.QMessageBox()
                 window.setWindowTitle("done")
-                window.setText("file has been saved as report.pdf in your current directory")
+                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
-            if len(self.fileNames) == 1 : 
+            if len(self.activePlots) == 1 : 
                 fig, (ax1, ax2) = plt.subplots(2)
                 fig.suptitle('Axes values are scaled individually by default')
 
-                ax1.plot(self.time1, self.volts1, color="rEd")
-                ax2.specgram(self.volts1, int(1 / self.sampleTime1))
+                plotNumber = self.activePlots[0]
+                time1 = getattr(self,"time" + str(plotNumber))
+                volts1 = getattr(self,"volts" + str(plotNumber))
+                sampleTime1 = getattr(self, "sampleTime" + str(plotNumber))
+
+                ax1.plot(time1, volts1, color="rEd")
+                ax2.specgram(volts1, int(1 / sampleTime1))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
@@ -634,8 +665,10 @@ class Ui_SignalViewer(object):
                 fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
                 window = QtWidgets.QMessageBox()
                 window.setWindowTitle("done")
-                window.setText("file has been saved as report.pdf in your current directory")
+                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
+            if len(self.activePlots) == 0 : 
+                self.warnDialog("there are no signals")
     
 
     def pause(self) :
@@ -734,8 +767,8 @@ class Ui_SignalViewer(object):
                 plot = getattr(self, "plot" + str(self.selectedSignal))
                 if plot != None : 
                     rangOfY = getattr(self, 'yRangeOfSignal' + str(self.selectedSignal))
-                    rangOfY[0] += getattr(self, "scrollStep" + str(self.selectedSignal))
-                    rangOfY[1] += getattr(self, "scrollStep" + str(self.selectedSignal))
+                    rangOfY[0] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_y") # scrollStep1_y
+                    rangOfY[1] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangOfY[0],rangOfY[1]) # self.plot1.setYRange()
     
     def scroll_down(self) : 
@@ -746,8 +779,8 @@ class Ui_SignalViewer(object):
                 plot = getattr(self, "plot" + str(self.selectedSignal))
                 if plot != None : 
                     rangOfY = getattr(self, 'yRangeOfSignal' + str(self.selectedSignal))
-                    rangOfY[0] -= getattr(self, "scrollStep" + str(self.selectedSignal))
-                    rangOfY[1] -= getattr(self, "scrollStep" + str(self.selectedSignal))
+                    rangOfY[0] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
+                    rangOfY[1] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangOfY[0],rangOfY[1]) # self.plot1.setYRange()
 
     def scroll_left(self) :
@@ -758,8 +791,8 @@ class Ui_SignalViewer(object):
                 plot = getattr(self, "plot" + str(self.selectedSignal))
                 if plot != None : 
                     rangeOfX = getattr(self, 'xRangeOfSignal' + str(self.selectedSignal))
-                    rangeOfX[0] -= getattr(self, "scrollStep" + str(self.selectedSignal))
-                    rangeOfX[1] -= getattr(self, "scrollStep" + str(self.selectedSignal))
+                    rangeOfX[0] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
+                    rangeOfX[1] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
 
     def scroll_right(self) : 
@@ -770,8 +803,8 @@ class Ui_SignalViewer(object):
                 plot = getattr(self, "plot" + str(self.selectedSignal))
                 if plot != None : 
                     rangeOfX = getattr(self, 'xRangeOfSignal' + str(self.selectedSignal))
-                    rangeOfX[0] += getattr(self, "scrollStep" + str(self.selectedSignal))
-                    rangeOfX[1] += getattr(self, "scrollStep" + str(self.selectedSignal))
+                    rangeOfX[0] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
+                    rangeOfX[1] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
 
     def drawSpectoForSignal1(self,GView,y,freq) : 
