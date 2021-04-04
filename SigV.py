@@ -231,6 +231,14 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setObjectName("actionsave_file")
         self.actionsave_file.triggered.connect(self.generateReport)
         self.actionsave_file.setEnabled(False)
+        # clear 
+        self.actionClear = QtWidgets.QAction(SignalViewer)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("icons/delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionClear.setIcon(icon3)
+        self.actionClear.setObjectName("actionClear")
+        self.actionClear.triggered.connect(self.clearSignal)
+        self.actionClear.setEnabled(False)
 
         #background
         self.backGround = QtWidgets.QLabel("")
@@ -256,6 +264,7 @@ class Ui_SignalViewer(object):
         self.toolBar_2.addAction(self.actionzoom_out_v)
         self.toolBar_2.addAction(self.actionPause)  
         self.toolBar_2.addAction(self.actionResume)
+        self.toolBar_2.addAction(self.actionClear)
 
         #signal 1 == channel 1
         self.channelLabel1 = QtWidgets.QLabel("Channel 1")
@@ -372,14 +381,18 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setText(_translate("SignalViewer", "save file"))
         self.actionsave_file.setShortcut(_translate("SignalViewer", "Ctrl+S"))
         self.actionChoose_File.setText(_translate("SignalViewer", "Choose File"))
+        self.actionClear.setText(_translate("SignalViewer", "Clear a Signal"))
+        self.actionClear.setShortcut(_translate("SignalViewer", "Ctrl+D"))
     
     def windowResize(self,event) : 
+        self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
         self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
         self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
         self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
         self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
         self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
         self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
+
 
 
     def enableWidgets(self) : 
@@ -391,6 +404,7 @@ class Ui_SignalViewer(object):
         self.actionzoom_out_h.setEnabled(True)
         self.actionzoom_out_v.setEnabled(True)
         self.actionsave_file.setEnabled(True)
+        self.actionClear.setEnabled(True)
     
     def spaceClicked(self,ev) : 
         if self.selectedSignal == 0 :
@@ -414,25 +428,40 @@ class Ui_SignalViewer(object):
         self.selectedSignal = 3
 
 
+    def clearSignal(self) :
+        if self.selectedSignal == 0 : self.warnDialog("please select signal")
+        else : 
+            getattr(getattr(self,"signal" + str(self.selectedSignal)) , "clear")() # self.signal1.clear()
+            getattr(getattr(self,"signal" + str(self.selectedSignal + 3)) , "clear")() # self.signal1.clear()
+            setattr(self, "plotIndex" + str(self.selectedSignal), 200)     # self.plotIndex = 200
+            setattr(self, "xPointer" + str(self.selectedSignal), 0)        # self.xPointer  = 0
+            setattr(self, "plot" + str(self.selectedSignal), None)         # self.plot = None
+            setattr(self, "scrollStep" + str(self.selectedSignal), None)   # self.scrollStep = None
+            setattr(self, "xRangeStack" + str(self.selectedSignal), [])    # self.xRangeStack = []
+            setattr(self, "yRangeStack", [])                               # self.yRangeStack = []
+            setattr(self, "xRangeOfSignal" + str(self.selectedSignal), []) # self.xRangeOfSignal = []
+            setattr(self, "yRangeOfSignal", [])                            # self.yRangeOfSignal = []
+            getattr(getattr(self,"timer"+str(self.selectedSignal)), "stop")() # self.timer.stop()
+            getattr(getattr(self,"timer"+str(self.selectedSignal)), "setInterval")(0) #self.timer.setInterval(0)
+        
+        
+
+        
+
 
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
-        directory = dialog.getOpenFileNames(None,'select file','c:\\','csv files (*.csv)')
-        self.fileNames = directory[0]
-
-        if len(self.fileNames) == 0 : self.warnDialog("please Select data files")
-        if len(self.fileNames) >= 4 :
-            self.warnDialog("please Select 3 files or less")
-
-        if len(self.fileNames) == 3 :
+        directory = dialog.getOpenFileName(None,'select file','c:\\','csv files (*.csv)')
+        fileName = directory[0]
+        if fileName == '' :
+            self.warnDialog("please Select data files")
+            return
+        if(self.plot1 == None) :
             self.enableWidgets()
-            #read 3 files
-            csvFile1 = pd.read_csv(self.fileNames[0])
-            csvFile2 = pd.read_csv(self.fileNames[1])
-            csvFile3 = pd.read_csv(self.fileNames[2])
-
-            # exctract data to draw signal 1 
+            # read csv file 
+            csvFile1 = pd.read_csv(fileName)
+            # exctract data to draw signal 1
             self.time1 = csvFile1.iloc[:,0]
             self.volts1 = csvFile1.iloc[:,1]
             self.sampleTime1 = self.time1[1] - self.time1[0]
@@ -444,89 +473,46 @@ class Ui_SignalViewer(object):
             self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
             self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
             self.timer1.timeout.connect(self.update1)
-            self.timer1.start(50)
-
-            # exctract data to draw signal 2 
-            self.time2 = csvFile2.iloc[:,0]
-            self.volts2 = csvFile2.iloc[:,1]
-            self.sampleTime2 = self.time2[1] - self.time2[0]
-            self.scrollStep2 = 10 * self.sampleTime2
-            #plot spectogram
-            self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
-            # plot the signal 
-            self.plot2 = self.signal2.addPlot()
-            self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
-            self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
-            self.timer2.timeout.connect(self.update2)
-            self.timer2.start(50)
-
-            # exctract data to draw signal 3 
-            self.time3 = csvFile3.iloc[:,0]
-            self.volts3 = csvFile3.iloc[:,1]
-            self.sampleTime3 = self.time3[1] - self.time3[0]
-            self.scrollStep3 = 10 * self.sampleTime3
-            #plot spectogram
-            self.drawSpectoForSignal1(self.signal6, self.volts3, 1 / self.sampleTime3)
-            # plot the signal 
-            self.plot3 = self.signal3.addPlot()
-            self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
-            self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
-            self.timer3.timeout.connect(self.update3)
-            self.timer3.start(50)
-
-        if len(self.fileNames) == 2 : 
-            self.enableWidgets()
-            #read 2 files
-            csvFile1 = pd.read_csv(self.fileNames[0])
-            csvFile2 = pd.read_csv(self.fileNames[1])
-
-            # exctract data to draw signal 1 
-            self.time1 = csvFile1.iloc[:,0]
-            self.volts1 = csvFile1.iloc[:,1]
-            self.sampleTime1 = self.time1[1] - self.time1[0]
-            self.scrollStep1 = 10 * self.sampleTime1
-            #plot spectogram
-            self.drawSpectoForSignal1(self.signal4, self.volts1, 1 / self.sampleTime1)
-            # plot the signal 
-            self.plot1 = self.signal1.addPlot()
-            self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
-            self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
-            self.timer1.timeout.connect(self.update1)
-            self.timer1.start(50)
-
-            # exctract data to draw signal 2 
-            self.time2 = csvFile2.iloc[:,0]
-            self.volts2 = csvFile2.iloc[:,1]
-            self.sampleTime2 = self.time2[1] - self.time2[0]
-            self.scrollStep2 = 10 * self.sampleTime2
-            #plot spectogram
-            self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
-            # plot the signal 
-            self.plot2 = self.signal2.addPlot()
-            self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
-            self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
-            self.timer2.timeout.connect(self.update2)
-            self.timer2.start(50)
-        if len(self.fileNames) == 1 : 
-            self.enableWidgets()
-            #read 1 file
-            csvFile1 = pd.read_csv(self.fileNames[0])
-            # exctract data to draw signal 1 
-            self.time1 = csvFile1.iloc[:,0].to_numpy()
-            self.volts1 = csvFile1.iloc[:,1].to_numpy()
-            self.sampleTime1 = self.time1[1] - self.time1[0]
-            self.scrollStep1 = 10 * self.sampleTime1
-            #plot spectogram
-            self.drawSpectoForSignal1(self.signal4, self.volts1, 1 / self.sampleTime1)
-            # plot the signal 
-            self.plot1 = self.signal1.addPlot()
-            self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
-            self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
-            self.timer1.timeout.connect(self.update1)
-            self.timer1.start(50)
-
+            self.timer1.start(1)
+        else : 
+            if self.plot2 == None : 
+                self.enableWidgets()
+                # read csv file
+                csvFile2 = pd.read_csv(fileName)
+                # exctract data to plot the signal 
+                self.time2 = csvFile2.iloc[:,0]
+                self.volts2 = csvFile2.iloc[:,1]
+                self.sampleTime2 = self.time2[1] - self.time2[0]
+                self.scrollStep2 = 10 * self.sampleTime2
+                #plot spectogram
+                self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
+                # plot the signal 
+                self.plot2 = self.signal2.addPlot()
+                self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
+                self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
+                self.timer2.timeout.connect(self.update2)
+                self.timer2.start(1)
+            else : 
+                if self.plot3 == None : 
+                    self.enableWidgets()
+                    # read csv file
+                    csvFile3 = pd.read_csv(fileName)
+                    # exctract data to draw signal 3
+                    self.time3 = csvFile3.iloc[:,0]
+                    self.volts3 = csvFile3.iloc[:,1]
+                    self.sampleTime3 = self.time3[1] - self.time3[0]
+                    self.scrollStep3 = 10 * self.sampleTime3
+                    #plot spectogram
+                    self.drawSpectoForSignal1(self.signal6, self.volts3, 1 / self.sampleTime3)
+                    # plot the signal 
+                    self.plot3 = self.signal3.addPlot()
+                    self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
+                    self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
+                    self.timer3.timeout.connect(self.update3)
+                    self.timer3.start(1)
+                else : 
+                    self.warnDialog("please clear one of the signals first")
           
-
         
     def update1(self) :
         self.signal1.clear()
