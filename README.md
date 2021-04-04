@@ -5,3 +5,4 @@ using three channels
 it accepts .csv files 
 ## screen 
 ![application screen](img.PNG)
+![application screen](img1.PNG)
