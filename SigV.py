@@ -477,7 +477,7 @@ class Ui_SignalViewer(object):
             self.scrollStep1_x = 10 * self.sampleTime1
             self.scrollStep1_y = yrange / 10
             #plot spectogram
-            self.drawSpectoForSignal1(self.signal4, self.volts1, 1 / self.sampleTime1)
+            self.drawSpectrogram(self.signal4, self.volts1, 1 / self.sampleTime1)
             # plot the signal 
             self.plot1 = self.signal1.addPlot()
             self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
@@ -498,7 +498,7 @@ class Ui_SignalViewer(object):
                 self.scrollStep2_x = 10 * self.sampleTime2
                 self.scrollStep2_y = yrange / 10
                 #plot spectogram
-                self.drawSpectoForSignal1(self.signal5, self.volts2, 1 / self.sampleTime2)
+                self.drawSpectrogram(self.signal5, self.volts2, 1 / self.sampleTime2)
                 # plot the signal 
                 self.plot2 = self.signal2.addPlot()
                 self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
@@ -519,7 +519,7 @@ class Ui_SignalViewer(object):
                     self.scrollStep3_x = 10 * self.sampleTime3
                     self.scrollStep3_y = yrange / 10
                     #plot spectogram
-                    self.drawSpectoForSignal1(self.signal6, self.volts3, 1 / self.sampleTime3)
+                    self.drawSpectrogram(self.signal6, self.volts3, 1 / self.sampleTime3)
                     # plot the signal 
                     self.plot3 = self.signal3.addPlot()
                     self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
@@ -556,34 +556,34 @@ class Ui_SignalViewer(object):
         
     def generateReport(self) : 
             if len(self.activePlots) == 3: 
-                fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(6)
+                fig, (sunbPlot1, sunbPlot2, sunbPlot3, sunbPlot4, sunbPlot5, sunbPlot6) = plt.subplots(6)
                 fig.suptitle('Axes values are scaled individually by default')
 
-                ax1.plot(self.time1, self.volts1, color="rEd")
-                ax2.specgram(self.volts1,int(1 / self.sampleTime1))
+                sunbPlot1.plot(self.time1, self.volts1, color="rEd")
+                sunbPlot2.specgram(self.volts1,int(1 / self.sampleTime1))
 
-                ax3.plot(self.time2, self.volts2, color="magenta")
-                ax4.specgram(self.volts2, int(1 / self.sampleTime2))
+                sunbPlot3.plot(self.time2, self.volts2, color="magenta")
+                sunbPlot4.specgram(self.volts2, int(1 / self.sampleTime2))
 
-                ax5.plot(self.time3, self.volts3, color="blue")
-                ax6.specgram(self.volts3, int(1 / self.sampleTime3))
+                sunbPlot5.plot(self.time3, self.volts3, color="blue")
+                sunbPlot6.specgram(self.volts3, int(1 / self.sampleTime3))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
 
-                ax1.title.set_text('signal 1')
-                ax2.title.set_text('spectogram for signal 1')
-                ax3.title.set_text('signal 2')
-                ax4.title.set_text('spectogram for signal 2')
-                ax5.title.set_text('signal 3')
-                ax6.title.set_text('spectogram for signal 3')
+                sunbPlot1.title.set_text('signal 1')
+                sunbPlot2.title.set_text('spectogram for signal 1')
+                sunbPlot3.title.set_text('signal 2')
+                sunbPlot4.title.set_text('spectogram for signal 2')
+                sunbPlot5.title.set_text('signal 3')
+                sunbPlot6.title.set_text('spectogram for signal 3')
 
-                ax1.set_xlabel('time (s)')
-                ax3.set_xlabel('time (s)')
-                ax5.set_xlabel('time (s)')
-                ax1.set_ylabel('volts (v)')
-                ax3.set_ylabel('volts (v)')
-                ax5.set_ylabel('volts (v)')
+                sunbPlot1.set_xlabel('time (s)')
+                sunbPlot3.set_xlabel('time (s)')
+                sunbPlot5.set_xlabel('time (s)')
+                sunbPlot1.set_ylabel('volts (v)')
+                sunbPlot3.set_ylabel('volts (v)')
+                sunbPlot5.set_ylabel('volts (v)')
 
                 fig.tight_layout()
                 R = list(range(0, 11))
@@ -595,7 +595,7 @@ class Ui_SignalViewer(object):
                 window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
             if  len(self.activePlots) == 2 : 
-                fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
+                fig, (sunbPlot1, sunbPlot2, sunbPlot3, sunbPlot4) = plt.subplots(4)
                 fig.suptitle('Axes values are scaled individually by default')
 
                 plotNumber1 = self.activePlots[0] 
@@ -608,25 +608,25 @@ class Ui_SignalViewer(object):
                 time2 = getattr(self,"time" + str(plotNumber2))
                 volts2 = getattr(self,"volts" + str(plotNumber2))
                 sampleTime2 = getattr(self, "sampleTime" + str(plotNumber2))
-                # ax1.plot(self.time1, self.volts1, color="rEd")
-                ax1.plot(time1, volts1, color="rEd")
-                ax2.specgram(volts1, int(1 / sampleTime1) )
+                # sunbPlot1.plot(self.time1, self.volts1, color="rEd")
+                sunbPlot1.plot(time1, volts1, color="rEd")
+                sunbPlot2.specgram(volts1, int(1 / sampleTime1) )
 
-                ax3.plot(time2, volts2, color="magenta")
-                ax4.specgram(volts2, int(1 / sampleTime2))
+                sunbPlot3.plot(time2, volts2, color="magenta")
+                sunbPlot4.specgram(volts2, int(1 / sampleTime2))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
 
-                ax1.title.set_text('signal 1')
-                ax2.title.set_text('spectogram for signal 1')
-                ax3.title.set_text('signal 2')
-                ax4.title.set_text('spectogram for signal 2')
+                sunbPlot1.title.set_text('signal 1')
+                sunbPlot2.title.set_text('spectogram for signal 1')
+                sunbPlot3.title.set_text('signal 2')
+                sunbPlot4.title.set_text('spectogram for signal 2')
 
-                ax1.set_xlabel('time (s)')
-                ax3.set_xlabel('time (s)')
-                ax1.set_ylabel('volts (v)')
-                ax3.set_ylabel('volts (v)')
+                sunbPlot1.set_xlabel('time (s)')
+                sunbPlot3.set_xlabel('time (s)')
+                sunbPlot1.set_ylabel('volts (v)')
+                sunbPlot3.set_ylabel('volts (v)')
 
                 fig.tight_layout()
                 R = list(range(0, 11))
@@ -638,7 +638,7 @@ class Ui_SignalViewer(object):
                 window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
                 window.exec_()
             if len(self.activePlots) == 1 : 
-                fig, (ax1, ax2) = plt.subplots(2)
+                fig, (sunbPlot1, sunbPlot2) = plt.subplots(2)
                 fig.suptitle('Axes values are scaled individually by default')
 
                 plotNumber = self.activePlots[0]
@@ -646,17 +646,17 @@ class Ui_SignalViewer(object):
                 volts1 = getattr(self,"volts" + str(plotNumber))
                 sampleTime1 = getattr(self, "sampleTime" + str(plotNumber))
 
-                ax1.plot(time1, volts1, color="rEd")
-                ax2.specgram(volts1, int(1 / sampleTime1))
+                sunbPlot1.plot(time1, volts1, color="rEd")
+                sunbPlot2.specgram(volts1, int(1 / sampleTime1))
 
                 fig.set_figheight(12)
                 fig.set_figwidth(12)
 
-                ax1.title.set_text('signal 1')
-                ax2.title.set_text('spectogram for signal 1')
+                sunbPlot1.title.set_text('signal 1')
+                sunbPlot2.title.set_text('spectogram for signal 1')
 
-                ax1.set_xlabel('time (s)')
-                ax1.set_ylabel('volts (v)')
+                sunbPlot1.set_xlabel('time (s)')
+                sunbPlot1.set_ylabel('volts (v)')
 
                 fig.tight_layout()
                 R = list(range(0, 11))
@@ -807,9 +807,9 @@ class Ui_SignalViewer(object):
                     rangeOfX[1] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
                     getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
 
-    def drawSpectoForSignal1(self,GView,y,freq) : 
+    def drawSpectrogram(self,GView,y,freq) : 
         
-        f, t, Sxx = signal.spectrogram(y, freq)
+        frequancyArr, timeArr, Sxx = signal.spectrogram(y, freq)
         pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
 
         win = GView
@@ -828,8 +828,8 @@ class Ui_SignalViewer(object):
                       (0.0, (75, 0, 113, 255))]
         })
         img.setImage(Sxx)
-        img.scale(t[-1] / np.size(Sxx, axis=1), f[-1] / np.size(Sxx, axis=0))
-        p1.setLimits(xMin=0, xMax=t[-1], yMin=0, yMax=f[-1])
+        img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
+        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=0, yMax=frequancyArr[-1])
         p1.setLabel('bottom', "Time", units='s')
         p1.setLabel('left', "Frequency", units='Hz')
 
