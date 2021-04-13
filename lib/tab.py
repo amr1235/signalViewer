@@ -1,5 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget , GraphicsLayoutWidget
+from scipy import signal
+import pyqtgraph 
+import numpy as np
+
+
 
 class newTab(QtWidgets.QTabWidget) : 
     def __init__ (self) :
@@ -41,6 +46,7 @@ class centralWidget(QtWidgets.QWidget) :
 
         #start plotting the data 
         self.startPlotting()
+        self.drawSpectrogram()
         
     def startPlotting(self) :
         # plot original signal 
@@ -67,6 +73,32 @@ class centralWidget(QtWidgets.QWidget) :
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
         self.plot1.plot(self.timeData[0:self.plotIndex],self.editedVoltsData[0:self.plotIndex])
+    
+    def drawSpectrogram(self) :
+        freq = 1 / self.sampleTime
+        frequancyArr, timeArr, Sxx = signal.spectrogram(self.editedVoltsData, freq)
+        pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
+
+        win = self.SignalBeforeEditiing_2
+        p1 = win.addPlot()
+
+        img = pyqtgraph.ImageItem()
+        p1.addItem(img)
+        hist = pyqtgraph.HistogramLUTItem()
+        hist.setImageItem(img)
+        win.addItem(hist)
+        hist.setLevels(np.min(Sxx), np.max(Sxx))
+        hist.gradient.restoreState({
+            'mode':
+            'rgb',
+            'ticks': [(0.5, (0, 182, 188, 255)), (1.0, (246, 111, 0, 255)),
+                      (0.0, (75, 0, 113, 255))]
+        })
+        img.setImage(Sxx)
+        img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
+        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=0, yMax=frequancyArr[-1])
+        p1.setLabel('bottom', "Time", units='s')
+        p1.setLabel('left', "Frequency", units='Hz')
 
     def generateUiWidgets(self) : 
         font = QtGui.QFont()
@@ -112,7 +144,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.SpectrogramGroupBox.setObjectName("SpectrogramGroupBox")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.SpectrogramGroupBox)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.SignalBeforeEditiing_2 = QtWidgets.QGraphicsView(self.SpectrogramGroupBox)
+        self.SignalBeforeEditiing_2 = GraphicsLayoutWidget(self.SpectrogramGroupBox)
         self.SignalBeforeEditiing_2.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.SignalBeforeEditiing_2.setStyleSheet("background-color:rgb(0,0,0)")
         self.SignalBeforeEditiing_2.setObjectName("SignalBeforeEditiing_2")

@@ -592,38 +592,11 @@ class Ui_SignalViewer(object):
             currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.xRangeStack = [rangeOfX[0],rangeOfX[1]]
 
-    def drawSpectrogram(self,GView,y,freq) : 
-        
-        frequancyArr, timeArr, Sxx = signal.spectrogram(y, freq)
-        pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
-
-        win = GView
-        p1 = win.addPlot()
-
-        img = pyqtgraph.ImageItem()
-        p1.addItem(img)
-        hist = pyqtgraph.HistogramLUTItem()
-        hist.setImageItem(img)
-        win.addItem(hist)
-        hist.setLevels(np.min(Sxx), np.max(Sxx))
-        hist.gradient.restoreState({
-            'mode':
-            'rgb',
-            'ticks': [(0.5, (0, 182, 188, 255)), (1.0, (246, 111, 0, 255)),
-                      (0.0, (75, 0, 113, 255))]
-        })
-        img.setImage(Sxx)
-        img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
-        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=0, yMax=frequancyArr[-1])
-        p1.setLabel('bottom', "Time", units='s')
-        p1.setLabel('left', "Frequency", units='Hz')
-
     def key_up(self,ev) : 
         self.scroll_up()
     def key_down(self,ev) : 
         self.scroll_down()
     def key_left(self,ev) : 
-        print("test")
         self.scroll_left()
     def key_right(self,ev):
         self.scroll_right()	
