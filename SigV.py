@@ -19,6 +19,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 import random
 from PyQt5.QtGui import QPixmap
+from lib.tab import newTab
 
 
 
@@ -245,13 +246,13 @@ class Ui_SignalViewer(object):
         self.actionClear.setEnabled(False)
 
         #background
-        self.backGround = QtWidgets.QLabel("")
-        self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
-        self.backGround.setParent(SignalViewer)
-        pixmap = QPixmap('BackGround.PNG')
-        self.backGround.setPixmap(pixmap)
-        self.backGround.setScaledContents(True)
-        self.backGround.show()
+        # self.backGround = QtWidgets.QLabel("")
+        # self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
+        # self.backGround.setParent(SignalViewer)
+        # pixmap = QPixmap('BackGround.PNG')
+        # self.backGround.setPixmap(pixmap)
+        # self.backGround.setScaledContents(True)
+        # self.backGround.show()
         # select Folder
         self.actionChoose_File = QtWidgets.QAction(SignalViewer)
         self.actionChoose_File.setObjectName("actionChoose_File")
@@ -266,94 +267,105 @@ class Ui_SignalViewer(object):
         self.toolBar_2.addAction(self.actionzoom_out_h)
         self.toolBar_2.addAction(self.actionzoom_in_v)
         self.toolBar_2.addAction(self.actionzoom_out_v)
-        self.toolBar_2.addAction(self.actionPause)  
+        self.toolBar_2.addAction(self.actionPause)
         self.toolBar_2.addAction(self.actionResume)
         self.toolBar_2.addAction(self.actionClear)
 
-        #signal 1 == channel 1
-        self.channelLabel1 = QtWidgets.QLabel("Channel 1")
-        self.channelLabel1.setGeometry(5, 5, 50, 20)
-        self.channelLabel1.setParent(self.centralwidget)
-        self.channelLabel1.show()
-        self.channelLabel1.setObjectName("channelLabel1")
+        # taabs 
+        # layout =  QtWidgets.QGridLayout()
+        # SignalViewer.setLayout(layout)
+        self.tabwidget = newTab()
+        # self.tabwidget.addTab(label1, "Tab 1")
+        # self.tabwidget.addTab(label2, "Tab 2")
+        self.tabwidget.setParent(self.centralwidget)
+        self.tabwidget.resize(SignalViewer.width(),SignalViewer.height())
+        self.tabwidget.show()
+        self.tabwidget.add_new_viewer()
 
-        self.signal1 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
-        self.signal1.setObjectName("signal1")
-            # label to cover channel 1 
-        self.labelForSignal1 = clickableLabel()
-        self.labelForSignal1.setParent(self.signal1)
-        self.labelForSignal1.setGeometry(QtCore.QRect(0, 0,self.signal1.width(),self.signal1.height()))
-        self.labelForSignal1.show()
-        self.labelForSignal1.setObjectName("label1")
-        self.labelForSignal1.clickMethod = self.signal1Clicked
-            #label for spectogram of channel 1 
-        self.spectoLabel1 = QtWidgets.QLabel("spectogram for channel 1")
-        self.spectoLabel1.setGeometry(int(self.signal1.width()) + 10, 5, 150, 20)
-        self.spectoLabel1.setParent(self.centralwidget)
-        self.spectoLabel1.show()
-        self.spectoLabel1.setObjectName("spectoLabel1")
-            # spectogram of channel 1 we will name it signal 2 to be easly detect
-        self.signal4 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
-        self.signal4.setObjectName("signal2")
+        # #signal 1 == channel 1
+        # self.channelLabel1 = QtWidgets.QLabel("Channel 1")
+        # self.channelLabel1.setGeometry(5, 5, 50, 20)
+        # self.channelLabel1.setParent(self.centralwidget)
+        # self.channelLabel1.show()
+        # self.channelLabel1.setObjectName("channelLabel1")
+
+        # self.signal1 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
+        # self.signal1.setObjectName("signal1")
+        #     # label to cover channel 1 
+        # self.labelForSignal1 = clickableLabel()
+        # self.labelForSignal1.setParent(self.signal1)
+        # self.labelForSignal1.setGeometry(QtCore.QRect(0, 0,self.signal1.width(),self.signal1.height()))
+        # self.labelForSignal1.show()
+        # self.labelForSignal1.setObjectName("label1")
+        # self.labelForSignal1.clickMethod = self.signal1Clicked
+        #     #label for spectogram of channel 1 
+        # self.spectoLabel1 = QtWidgets.QLabel("spectogram for channel 1")
+        # self.spectoLabel1.setGeometry(int(self.signal1.width()) + 10, 5, 150, 20)
+        # self.spectoLabel1.setParent(self.centralwidget)
+        # self.spectoLabel1.show()
+        # self.spectoLabel1.setObjectName("spectoLabel1")
+        #     # spectogram of channel 1 we will name it signal 2 to be easly detect
+        # self.signal4 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
+        # self.signal4.setObjectName("signal2")
 
 
-        #signal 3 == channel 2
-        self.channelLabel2 = QtWidgets.QLabel("Channel 2")
-        self.channelLabel2.setGeometry(5, self.signal1.height() + 30, 50, 20)
-        self.channelLabel2.setParent(self.centralwidget)
-        self.channelLabel2.show()
-        self.channelLabel2.setObjectName("channelLabel 2")
+        # #signal 3 == channel 2
+        # self.channelLabel2 = QtWidgets.QLabel("Channel 2")
+        # self.channelLabel2.setGeometry(5, self.signal1.height() + 30, 50, 20)
+        # self.channelLabel2.setParent(self.centralwidget)
+        # self.channelLabel2.show()
+        # self.channelLabel2.setObjectName("channelLabel 2")
 
-        self.signal2 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
-        self.signal2.setObjectName("signal3")
-            # label to cover channel 1 
-        self.labelForSignal3 = clickableLabel()
-        self.labelForSignal3.setParent(self.signal2)
-        self.labelForSignal3.setGeometry(QtCore.QRect(0, 0,self.signal2.width(),self.signal2.height()))
-        self.labelForSignal3.show()
-        self.labelForSignal3.setObjectName("label2")
-        self.labelForSignal3.clickMethod = self.signal2Clicked
-            #label for spectogram of channel 1 
-        self.spectoLabel2 = QtWidgets.QLabel("spectogram for channel 2")
-        self.spectoLabel2.setGeometry(int(self.signal1.width()) + 10, self.signal4.height() + 30, 150, 20)
-        self.spectoLabel2.setParent(self.centralwidget)
-        self.spectoLabel2.show()
-        self.spectoLabel2.setObjectName("specto2")
-            # spectogram of channel 2 we will name it signal 4 to be easly detect
-        self.signal5 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
-        self.signal5.setObjectName("signal2")
+        # self.signal2 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
+        # self.signal2.setObjectName("signal3")
+        #     # label to cover channel 1 
+        # self.labelForSignal3 = clickableLabel()
+        # self.labelForSignal3.setParent(self.signal2)
+        # self.labelForSignal3.setGeometry(QtCore.QRect(0, 0,self.signal2.width(),self.signal2.height()))
+        # self.labelForSignal3.show()
+        # self.labelForSignal3.setObjectName("label2")
+        # self.labelForSignal3.clickMethod = self.signal2Clicked
+        #     #label for spectogram of channel 1 
+        # self.spectoLabel2 = QtWidgets.QLabel("spectogram for channel 2")
+        # self.spectoLabel2.setGeometry(int(self.signal1.width()) + 10, self.signal4.height() + 30, 150, 20)
+        # self.spectoLabel2.setParent(self.centralwidget)
+        # self.spectoLabel2.show()
+        # self.spectoLabel2.setObjectName("specto2")
+        #     # spectogram of channel 2 we will name it signal 4 to be easly detect
+        # self.signal5 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
+        # self.signal5.setObjectName("signal2")
 
-        #signal 5 channel 3 
-        self.channelLabel3 = QtWidgets.QLabel("Channel 3")
-        self.channelLabel3.setGeometry(5, self.signal1.height() + self.signal2.height() + 60, 50, 20)
-        self.channelLabel3.setParent(self.centralwidget)
-        self.channelLabel3.show()
-        self.channelLabel3.setObjectName("channelLabel 3")
+        # #signal 5 channel 3 
+        # self.channelLabel3 = QtWidgets.QLabel("Channel 3")
+        # self.channelLabel3.setGeometry(5, self.signal1.height() + self.signal2.height() + 60, 50, 20)
+        # self.channelLabel3.setParent(self.centralwidget)
+        # self.channelLabel3.show()
+        # self.channelLabel3.setObjectName("channelLabel 3")
 
-        self.signal3 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
-        self.signal3.setObjectName("signal5")
-            # label to cover channel 1 
-        self.labelForSignal5 = clickableLabel()
-        self.labelForSignal5.setParent(self.signal3)
-        self.labelForSignal5.setGeometry(QtCore.QRect(0, 0,self.signal3.width(),self.signal3.height()))
-        self.labelForSignal5.show()
-        self.labelForSignal5.setObjectName("label2")
-        self.labelForSignal5.clickMethod = self.signal3Clicked
-            #label for spectogram of channel 1 
-        self.spectoLabel3 = QtWidgets.QLabel("spectogram for channel 3")
-        self.spectoLabel3.setGeometry(self.signal1.width() + 10, self.signal5.height() + self.signal4.height() + 60, 150, 20)
-        self.spectoLabel3.setParent(self.centralwidget)
-        self.spectoLabel3.show()
-        self.spectoLabel3.setObjectName("specto3")
-            # spectogram of channel 3 we will name it signal 6 to be easly detect
-        self.signal6 = GraphicsLayoutWidget(self.centralwidget)
-        self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
-        self.signal6.setObjectName("signal2")
+        # self.signal3 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
+        # self.signal3.setObjectName("signal5")
+        #     # label to cover channel 1 
+        # self.labelForSignal5 = clickableLabel()
+        # self.labelForSignal5.setParent(self.signal3)
+        # self.labelForSignal5.setGeometry(QtCore.QRect(0, 0,self.signal3.width(),self.signal3.height()))
+        # self.labelForSignal5.show()
+        # self.labelForSignal5.setObjectName("label2")
+        # self.labelForSignal5.clickMethod = self.signal3Clicked
+        #     #label for spectogram of channel 1 
+        # self.spectoLabel3 = QtWidgets.QLabel("spectogram for channel 3")
+        # self.spectoLabel3.setGeometry(self.signal1.width() + 10, self.signal5.height() + self.signal4.height() + 60, 150, 20)
+        # self.spectoLabel3.setParent(self.centralwidget)
+        # self.spectoLabel3.show()
+        # self.spectoLabel3.setObjectName("specto3")
+        #     # spectogram of channel 3 we will name it signal 6 to be easly detect
+        # self.signal6 = GraphicsLayoutWidget(self.centralwidget)
+        # self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
+        # self.signal6.setObjectName("signal2")
 
         #timer
         self.timer1 = QtCore.QTimer()
@@ -389,13 +401,14 @@ class Ui_SignalViewer(object):
         self.actionClear.setShortcut(_translate("SignalViewer", "Ctrl+D"))
     
     def windowResize(self,event) : 
-        self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
-        self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
-        self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
-        self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
-        self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
-        self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
-        self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
+        # self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
+        self.tabwidget.resize(SignalViewer.width(),SignalViewer.height())
+        # self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
+        # self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
+        # self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
+        # self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
+        # self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
+        # self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
 
 
 
