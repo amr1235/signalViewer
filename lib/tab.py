@@ -10,8 +10,6 @@ class newTab(QtWidgets.QTabWidget) :
         self.numberOfTabs += 1
         centralwidget = centralWidget(timeData,voltsData)
         self.addTab(centralwidget, "Signal " + str(self.numberOfTabs))
-    # def activateWindow(self,ev) :
-    #     e
 
 # we are going to put all of our widgets inside the tab wrapped by a QWidget
 class centralWidget(QtWidgets.QWidget) :
@@ -33,6 +31,11 @@ class centralWidget(QtWidgets.QWidget) :
 
         self.xRangeOfSignal = [] # [from , to] 
         self.yRangeOfSignal = []
+
+        self.sampleTime = timeData[1] - timeData[0]
+        yrange = voltsData[len(voltsData) - 1] - voltsData[0]
+        self.scrollStep_x = 10 * self.sampleTime
+        self.scrollStep_y = yrange / 10
         
         self.timer = QtCore.QTimer()
 

@@ -42,9 +42,6 @@ class mainWindow(QtWidgets.QMainWindow) :
         self.KeyLeftMethod = None
         self.KeyRightMethod = None
         self.spaceMethod = None
-        self.number_1_method = None
-        self.number_2_method = None
-        self.number_3_method = None
         self.windowResizeMethod = None
     
     def keyPressEvent(self, ev) :
@@ -58,12 +55,6 @@ class mainWindow(QtWidgets.QMainWindow) :
             self.KeyRightMethod(ev)
         if ev.key() == Qt.Key_Space : 
             self.spaceMethod(ev)
-        if ev.key() == Qt.Key_1 : 
-            self.number_1_method(ev) 
-        if ev.key() == Qt.Key_2 :
-            self.number_2_method(ev)
-        if ev.key() == Qt.Key_3 : 
-            self.number_3_method(ev)
     def resizeEvent(self, ev) : 
         self.windowResizeMethod(ev)
 
@@ -74,64 +65,17 @@ class mainWindow(QtWidgets.QMainWindow) :
 class Ui_SignalViewer(object):
 
     def __init__(self):
-        self.selectedSignal = 0
-
-        self.fileNames = None
         self.isPaused = False
-        self.activePlots = []
-
-        self.plotIndex1 = 200
-        self.xPointer1  = 0
-        self.plot1 = None
-        self.scrollStep1_x = None
-        self.scrollStep1_y = None
-
-        self.plotIndex2 = 200
-        self.xPointer2  = 0
-        self.plot2 = None
-        self.scrollStep2_x = None
-        self.scrollStep2_y = None
-
-        self.plotIndex3 = 200
-        self.xPointer3  = 0
-        self.plot3 = None
-        self.scrollStep3_x = None
-        self.scrollStep3_y = None
-
-        self.xRangeStack1 = []
-        self.yRangeStack1 = []
-
-        self.xRangeStack2 = []
-        self.yRangeStack2 = []
-
-        self.xRangeStack3 = []
-        self.yRangeStack3 = []
-
-        self.xRangeOfSignal1 = [] # from , to 
-        self.yRangeOfSignal1 = []
-
-        self.xRangeOfSignal2 = []
-        self.yRangeOfSignal2 = []
-        
-        self.xRangeOfSignal3 = []
-        self.yRangeOfSignal3 = []
-
-
 
     def setupUi(self, SignalViewer):
         SignalViewer.setObjectName("SignalViewer")
         SignalViewer.resize(1350, 690)
-        # SignalViewer.setFixedWidth(1350)
-        # SignalViewer.setFixedHeight(690)
         SignalViewer.setTabShape(QtWidgets.QTabWidget.Triangular)
         SignalViewer.KeyUpMethod = self.key_up
         SignalViewer.KeyDownMethod = self.key_down    
         SignalViewer.KeyLeftMethod = self.key_left
         SignalViewer.KeyRightMethod = self.key_right
         SignalViewer.spaceMethod = self.spaceClicked
-        SignalViewer.number_1_method = self.number_1_clicked
-        SignalViewer.number_2_method = self.number_2_clicked
-        SignalViewer.number_3_method = self.number_3_clicked
         SignalViewer.windowResizeMethod = self.windowResize
         
         self.centralwidget = QtWidgets.QWidget(SignalViewer)
@@ -264,106 +208,11 @@ class Ui_SignalViewer(object):
         self.toolBar_2.addAction(self.actionResume)
         self.toolBar_2.addAction(self.actionClear)
 
-        # taabs 
-        # layout =  QtWidgets.QGridLayout()
-        # SignalViewer.setLayout(layout)
+        # tab widget 
         self.tabwidget = newTab()
-        # self.tabwidget.addTab(label1, "Tab 1")
-        # self.tabwidget.addTab(label2, "Tab 2")
         self.tabwidget.setParent(self.centralwidget)
         self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
         self.tabwidget.show()
-        
-
-        # #signal 1 == channel 1
-        # self.channelLabel1 = QtWidgets.QLabel("Channel 1")
-        # self.channelLabel1.setGeometry(5, 5, 50, 20)
-        # self.channelLabel1.setParent(self.centralwidget)
-        # self.channelLabel1.show()
-        # self.channelLabel1.setObjectName("channelLabel1")
-
-        # self.signal1 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
-        # self.signal1.setObjectName("signal1")
-        #     # label to cover channel 1 
-        # self.labelForSignal1 = clickableLabel()
-        # self.labelForSignal1.setParent(self.signal1)
-        # self.labelForSignal1.setGeometry(QtCore.QRect(0, 0,self.signal1.width(),self.signal1.height()))
-        # self.labelForSignal1.show()
-        # self.labelForSignal1.setObjectName("label1")
-        # self.labelForSignal1.clickMethod = self.signal1Clicked
-        #     #label for spectogram of channel 1 
-        # self.spectoLabel1 = QtWidgets.QLabel("spectogram for channel 1")
-        # self.spectoLabel1.setGeometry(int(self.signal1.width()) + 10, 5, 150, 20)
-        # self.spectoLabel1.setParent(self.centralwidget)
-        # self.spectoLabel1.show()
-        # self.spectoLabel1.setObjectName("spectoLabel1")
-        #     # spectogram of channel 1 we will name it signal 2 to be easly detect
-        # self.signal4 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
-        # self.signal4.setObjectName("signal2")
-
-
-        # #signal 3 == channel 2
-        # self.channelLabel2 = QtWidgets.QLabel("Channel 2")
-        # self.channelLabel2.setGeometry(5, self.signal1.height() + 30, 50, 20)
-        # self.channelLabel2.setParent(self.centralwidget)
-        # self.channelLabel2.show()
-        # self.channelLabel2.setObjectName("channelLabel 2")
-
-        # self.signal2 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
-        # self.signal2.setObjectName("signal3")
-        #     # label to cover channel 1 
-        # self.labelForSignal3 = clickableLabel()
-        # self.labelForSignal3.setParent(self.signal2)
-        # self.labelForSignal3.setGeometry(QtCore.QRect(0, 0,self.signal2.width(),self.signal2.height()))
-        # self.labelForSignal3.show()
-        # self.labelForSignal3.setObjectName("label2")
-        # self.labelForSignal3.clickMethod = self.signal2Clicked
-        #     #label for spectogram of channel 1 
-        # self.spectoLabel2 = QtWidgets.QLabel("spectogram for channel 2")
-        # self.spectoLabel2.setGeometry(int(self.signal1.width()) + 10, self.signal4.height() + 30, 150, 20)
-        # self.spectoLabel2.setParent(self.centralwidget)
-        # self.spectoLabel2.show()
-        # self.spectoLabel2.setObjectName("specto2")
-        #     # spectogram of channel 2 we will name it signal 4 to be easly detect
-        # self.signal5 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
-        # self.signal5.setObjectName("signal2")
-
-        # #signal 5 channel 3 
-        # self.channelLabel3 = QtWidgets.QLabel("Channel 3")
-        # self.channelLabel3.setGeometry(5, self.signal1.height() + self.signal2.height() + 60, 50, 20)
-        # self.channelLabel3.setParent(self.centralwidget)
-        # self.channelLabel3.show()
-        # self.channelLabel3.setObjectName("channelLabel 3")
-
-        # self.signal3 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
-        # self.signal3.setObjectName("signal5")
-        #     # label to cover channel 1 
-        # self.labelForSignal5 = clickableLabel()
-        # self.labelForSignal5.setParent(self.signal3)
-        # self.labelForSignal5.setGeometry(QtCore.QRect(0, 0,self.signal3.width(),self.signal3.height()))
-        # self.labelForSignal5.show()
-        # self.labelForSignal5.setObjectName("label2")
-        # self.labelForSignal5.clickMethod = self.signal3Clicked
-        #     #label for spectogram of channel 1 
-        # self.spectoLabel3 = QtWidgets.QLabel("spectogram for channel 3")
-        # self.spectoLabel3.setGeometry(self.signal1.width() + 10, self.signal5.height() + self.signal4.height() + 60, 150, 20)
-        # self.spectoLabel3.setParent(self.centralwidget)
-        # self.spectoLabel3.show()
-        # self.spectoLabel3.setObjectName("specto3")
-        #     # spectogram of channel 3 we will name it signal 6 to be easly detect
-        # self.signal6 = GraphicsLayoutWidget(self.centralwidget)
-        # self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
-        # self.signal6.setObjectName("signal2")
-
-        #timer
-        self.timer1 = QtCore.QTimer()
-        self.timer2 = QtCore.QTimer()
-        self.timer3 = QtCore.QTimer()
         
 
         self.retranslateUi(SignalViewer)
@@ -394,14 +243,7 @@ class Ui_SignalViewer(object):
         self.actionClear.setShortcut(_translate("SignalViewer", "Ctrl+D"))
     
     def windowResize(self,event) : 
-        # self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
         self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
-        # self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
-        # self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
-        # self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
-        # self.signal5.setGeometry( self.signal1.width() + 10, self.signal4.height() + 55,self.signal1.width(),170)
-        # self.signal3.setGeometry(QtCore.QRect(5, self.signal1.height() + self.signal2.height() + 85,  self.signal1.width() ,170))
-        # self.signal6.setGeometry( self.signal1.width() + 10, self.signal2.height()+ self.signal3.height() + 85,self.signal1.width(),170)
 
 
 
@@ -415,26 +257,14 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setEnabled(True)
         self.actionClear.setEnabled(True)
     
-    def spaceClicked(self,ev) : 
-        if self.selectedSignal == 0 :
-            self.warnDialog("please Select Signal")
+    def spaceClicked(self,ev) :
+        if self.isPaused : 
+            self.resume()
+            self.isPaused = not self.isPaused
         else : 
-            if self.isPaused : 
-                self.resume()
-                self.isPaused = not self.isPaused
-            else : 
-                self.pause()
-                self.isPaused = not self.isPaused
+            self.pause()
+            self.isPaused = not self.isPaused
 
-
-    def number_1_clicked(self,ev) : 
-        self.selectedSignal = 1 
-
-    def number_2_clicked(self,ev) : 
-        self.selectedSignal = 2
-    
-    def number_3_clicked(self,ev) : 
-        self.selectedSignal = 3
 
 
     def clearSignal(self) :
@@ -456,11 +286,6 @@ class Ui_SignalViewer(object):
             getattr(getattr(self,"timer"+str(self.selectedSignal)), "stop")() # self.timer.stop()
             getattr(getattr(self,"timer"+str(self.selectedSignal)), "setInterval")(0) #self.timer.setInterval(0)
         
-        
-
-        
-
-
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
@@ -681,15 +506,6 @@ class Ui_SignalViewer(object):
         window.setWindowTitle("error")
         window.setText(message)
         window.exec_()
-    
-    def signal1Clicked(self) : 
-        self.selectedSignal = 1
-
-    def signal2Clicked(self) :
-        self.selectedSignal = 2
-    
-    def signal3Clicked(self) :
-        self.selectedSignal = 3
         
     def zoom_in_h(self) :
         currentTab = self.tabwidget.currentWidget()
@@ -737,52 +553,44 @@ class Ui_SignalViewer(object):
                 currentTab.yRangeOfSignal = [rangeOfY[0],rangeOfY[1]]
     
     def scroll_up(self) :
-        if self.selectedSignal == 0 : self.warnDialog("Please Select Signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False :
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    rangOfY = getattr(self, 'yRangeOfSignal' + str(self.selectedSignal))
-                    rangOfY[0] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_y") # scrollStep1_y
-                    rangOfY[1] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangOfY[0],rangOfY[1]) # self.plot1.setYRange()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            rangOfY = currentTab.yRangeOfSignal
+            rangOfY[0] += currentTab.scrollStep_y
+            rangOfY[1] += currentTab.scrollStep_y
+            currentTab.plot.setYRange(rangOfY[0],rangOfY[1])
+            currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
+            currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
     
     def scroll_down(self) : 
-        if self.selectedSignal == 0 : self.warnDialog("Please Select Signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False :
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    rangOfY = getattr(self, 'yRangeOfSignal' + str(self.selectedSignal))
-                    rangOfY[0] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
-                    rangOfY[1] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_y")
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangOfY[0],rangOfY[1]) # self.plot1.setYRange()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            rangOfY = currentTab.yRangeOfSignal
+            rangOfY[0] -= currentTab.scrollStep_y
+            rangOfY[1] -= currentTab.scrollStep_y
+            currentTab.plot.setYRange(rangOfY[0],rangOfY[1])
+            currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
+            currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
 
     def scroll_left(self) :
-        if self.selectedSignal == 0 : self.warnDialog("Please Select Signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    rangeOfX = getattr(self, 'xRangeOfSignal' + str(self.selectedSignal))
-                    rangeOfX[0] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
-                    rangeOfX[1] -= getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            rangeOfX = currentTab.xRangeOfSignal
+            rangeOfX[0] -= currentTab.scrollStep_x
+            rangeOfX[1] -= currentTab.scrollStep_x
+            currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.xRangeStack = [rangeOfX[0],rangeOfX[1]]
 
-    def scroll_right(self) : 
-        if self.selectedSignal == 0 : self.warnDialog("Please Select Signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    rangeOfX = getattr(self, 'xRangeOfSignal' + str(self.selectedSignal))
-                    rangeOfX[0] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
-                    rangeOfX[1] += getattr(self, "scrollStep" + str(self.selectedSignal) + "_x")
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
+    def scroll_right(self) :
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            rangeOfX = currentTab.xRangeOfSignal
+            rangeOfX[0] += currentTab.scrollStep_x
+            rangeOfX[1] += currentTab.scrollStep_x
+            currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.xRangeStack = [rangeOfX[0],rangeOfX[1]]
 
     def drawSpectrogram(self,GView,y,freq) : 
         
@@ -812,10 +620,10 @@ class Ui_SignalViewer(object):
 
     def key_up(self,ev) : 
         self.scroll_up()
-    
     def key_down(self,ev) : 
         self.scroll_down()
     def key_left(self,ev) : 
+        print("test")
         self.scroll_left()
     def key_right(self,ev):
         self.scroll_right()	
