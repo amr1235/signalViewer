@@ -21,30 +21,49 @@ class centralWidget(QtWidgets.QWidget) :
         self.generateUiWidgets()
         # initializing important variables for plotting
         self.timeData = timeData
-        self.voltsData = voltsData
+        self.originalVoltsData = voltsData
+        self.editedVoltsData   = voltsData
         self.plotIndex = 200
         self.xPointer  = 0
-        self.plot = None
+        self.plot = None # original Plot
+        self.plot1 = None # plot After Editing
+
+        self.xRangeStack = []
+        self.yRangeStack = []
+
+        self.xRangeOfSignal = [] # [from , to] 
+        self.yRangeOfSignal = []
+        
         self.timer = QtCore.QTimer()
 
         #start plotting the data 
-        # plot original signal 
         self.startPlotting()
         
     def startPlotting(self) :
+        # plot original signal 
         self.plot = self.OriginalSignalViewer.addPlot()
-        self.plot.plot(self.timeData[self.xPointer:self.plotIndex],self.voltsData[self.xPointer:self.plotIndex])
+        self.plot.plot(self.timeData[self.xPointer:self.plotIndex],self.originalVoltsData[self.xPointer:self.plotIndex])
         self.plot.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
+        # plot data After Editing
+        self.plot1 = self.EditedSignalViewer.addPlot()
+        self.plot1.plot(self.timeData[self.xPointer:self.plotIndex],self.editedVoltsData[self.xPointer:self.plotIndex])
+        self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
         self.timer.timeout.connect(self.update)
         self.timer.start(50)
     
     def update(self) :
         self.OriginalSignalViewer.clear()
+        self.EditedSignalViewer.clear()
         self.xPointer += 1
         self.plotIndex += 1
+        # original data
         self.plot = self.OriginalSignalViewer.addPlot()
         self.plot.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
-        self.plot.plot(self.timeData[0:self.plotIndex],self.voltsData[0:self.plotIndex])
+        self.plot.plot(self.timeData[0:self.plotIndex],self.originalVoltsData[0:self.plotIndex])
+        # edited data 
+        self.plot1 = self.EditedSignalViewer.addPlot()
+        self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
+        self.plot1.plot(self.timeData[0:self.plotIndex],self.editedVoltsData[0:self.plotIndex])
 
     def generateUiWidgets(self) : 
         font = QtGui.QFont()
@@ -106,7 +125,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.EditedSignalGroupBox.setObjectName("EditedSignalGroupBox")
         self.gridLayout_5 = QtWidgets.QGridLayout(self.EditedSignalGroupBox)
         self.gridLayout_5.setObjectName("gridLayout_5")
-        self.EditedSignalViewer = QtWidgets.QGraphicsView(self.EditedSignalGroupBox)
+        self.EditedSignalViewer = GraphicsLayoutWidget(self.EditedSignalGroupBox)
         self.EditedSignalViewer.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.EditedSignalViewer.setStyleSheet("background-color:rgb(0,0,0)")
         self.EditedSignalViewer.setObjectName("EditedSignalViewer")

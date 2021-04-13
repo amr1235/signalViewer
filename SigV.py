@@ -541,31 +541,6 @@ class Ui_SignalViewer(object):
         #             self.timer3.start(50)
         #         else : 
         #             self.warnDialog("please clear one of the signals first")
-          
-        
-    def update1(self) :
-        self.signal1.clear()
-        self.xPointer1 += 1
-        self.plotIndex1 += 1
-        self.plot1 = self.signal1.addPlot()
-        self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
-        self.plot1.plot(self.time1[0:self.plotIndex1],self.volts1[0:self.plotIndex1])
-    
-    def update2(self) : 
-        self.signal2.clear()
-        self.xPointer2 += 1
-        self.plotIndex2 += 1
-        self.plot2 = self.signal2.addPlot()
-        self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
-        self.plot2.plot(self.time2[0:self.plotIndex2],self.volts2[0:self.plotIndex2])
-    
-    def update3(self) : 
-        self.signal3.clear()
-        self.xPointer3 += 1
-        self.plotIndex3 += 1
-        self.plot3 = self.signal3.addPlot()
-        self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
-        self.plot3.plot(self.time3[0:self.plotIndex3],self.volts3[0:self.plotIndex3])
         
     def generateReport(self) : 
             if len(self.activePlots) == 3: 
@@ -682,18 +657,19 @@ class Ui_SignalViewer(object):
                 window.exec_()
             if len(self.activePlots) == 0 : 
                 self.warnDialog("there are no signals")
-    
 
     def pause(self) :
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() : 
                 currentTab.timer.stop()
+                ranges = currentTab.plot.viewRange()
+                currentTab.xRangeOfSignal = ranges[0]
+                currentTab.yRangeOfSignal = ranges[1]
                 # ranges = getattr(getattr(self, "plot" + str(self.selectedSignal)), "viewRange")() # self.plot.viewRange()
                 # setattr(self, "xRangeOfSignal" + str(self.selectedSignal),ranges[0])
                 # setattr(self, "yRangeOfSignal" + str(self.selectedSignal),ranges[1])
 
                     
-
     def resume(self) : 
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False : 
@@ -716,58 +692,49 @@ class Ui_SignalViewer(object):
         self.selectedSignal = 3
         
     def zoom_in_h(self) :
-        if self.selectedSignal == 0 : self.warnDialog("please Select signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    xRangeOfSignal = getattr(self, "xRangeOfSignal" + str(self.selectedSignal))
-                    getattr(getattr(self, "xRangeStack" + str(self.selectedSignal)), "append")([xRangeOfSignal[0],xRangeOfSignal[1]]) # self.xRangeStack1.append()
-                    rangeOfX = getattr(self, "xRangeOfSignal" + str(self.selectedSignal))
-                    rangeOfX[0] =  rangeOfX[0] * 0.8
-                    rangeOfX[1] =  rangeOfX[1] * 0.8
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            xRangeOfSignal = currentTab.xRangeOfSignal
+            currentTab.xRangeStack.append([xRangeOfSignal[0],xRangeOfSignal[1]])
+            rangeOfX    = currentTab.xRangeOfSignal
+            rangeOfX[0] =  rangeOfX[0] * 0.8
+            rangeOfX[1] =  rangeOfX[1] * 0.8
+            currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
+
 
     def zoom_out_h(self) :
-        if self.selectedSignal == 0 : self.warnDialog("please Select signal")
-        else :
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    xRangeStack = getattr(self, "xRangeStack" + str(self.selectedSignal))
-                    if len(xRangeStack) != 0 : 
-                        rangeOfX = xRangeStack.pop()
-                        getattr(getattr(self, "plot" + str(self.selectedSignal)), "setXRange")(rangeOfX[0],rangeOfX[1]) # self.plot1.setXRange()
-                        setattr(self, "xRangeOfSignal" + str(self.selectedSignal), [rangeOfX[0],rangeOfX[1]])
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            xRangeStack = currentTab.xRangeStack
+            if len(xRangeStack) != 0 :
+                rangeOfX = xRangeStack.pop()
+                currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
+                currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+                currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
     
     def zoom_in_v(self) : 
-        if self.selectedSignal == 0 : self.warnDialog("please Select signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    yRangeOfSignal = getattr(self, "yRangeOfSignal" + str(self.selectedSignal))
-                    getattr(getattr(self, "yRangeStack" + str(self.selectedSignal)), "append")([yRangeOfSignal[0],yRangeOfSignal[1]]) # self.yRangeStack.append()
-                    rangeOfY = getattr(self, "yRangeOfSignal" + str(self.selectedSignal))
-                    rangeOfY[0] =  rangeOfY[0] * 0.8
-                    rangeOfY[1] =  rangeOfY[1] * 0.8
-                    getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangeOfY[0],rangeOfY[1]) # self.plot1.setYRange()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            yRangeOfSignal = currentTab.yRangeOfSignal
+            currentTab.yRangeStack.append([yRangeOfSignal[0],yRangeOfSignal[1]])
+            rangeOfY = currentTab.yRangeOfSignal
+            rangeOfY[0] =  rangeOfY[0] * 0.8
+            rangeOfY[1] =  rangeOfY[1] * 0.8
+            currentTab.plot.setYRange(rangeOfY[0],rangeOfY[1])
+            currentTab.plot1.setYRange(rangeOfY[0],rangeOfY[1])
+            currentTab.yRangeOfSignal = [rangeOfY[0],rangeOfY[1]]
 
     def zoom_out_v(self) :
-        if self.selectedSignal == 0 : self.warnDialog("please Select signal")
-        else :
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                plot = getattr(self, "plot" + str(self.selectedSignal))
-                if plot != None : 
-                    yRangeStack = getattr(self, "yRangeStack" + str(self.selectedSignal))
-                    if len(yRangeStack) != 0 : 
-                        rangeOfY = yRangeStack.pop()
-                        getattr(getattr(self, "plot" + str(self.selectedSignal)), "setYRange")(rangeOfY[0],rangeOfY[1]) # self.plot1.setXRange()
-                        setattr(self, "yRangeOfSignal" + str(self.selectedSignal), [rangeOfY[0],rangeOfY[1]])
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False :
+            yRangeStack = currentTab.yRangeStack
+            if len(yRangeStack) != 0 :
+                rangeOfY = yRangeStack.pop()
+                currentTab.plot.setYRange(rangeOfY[0],rangeOfY[1])
+                currentTab.plot1.setYRange(rangeOfY[0],rangeOfY[1])
+                currentTab.yRangeOfSignal = [rangeOfY[0],rangeOfY[1]]
     
     def scroll_up(self) :
         if self.selectedSignal == 0 : self.warnDialog("Please Select Signal")
