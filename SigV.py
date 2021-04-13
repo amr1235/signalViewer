@@ -75,6 +75,7 @@ class Ui_SignalViewer(object):
 
     def __init__(self):
         self.selectedSignal = 0
+
         self.fileNames = None
         self.isPaused = False
         self.activePlots = []
@@ -245,14 +246,6 @@ class Ui_SignalViewer(object):
         self.actionClear.triggered.connect(self.clearSignal)
         self.actionClear.setEnabled(False)
 
-        #background
-        # self.backGround = QtWidgets.QLabel("")
-        # self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
-        # self.backGround.setParent(SignalViewer)
-        # pixmap = QPixmap('BackGround.PNG')
-        # self.backGround.setPixmap(pixmap)
-        # self.backGround.setScaledContents(True)
-        # self.backGround.show()
         # select Folder
         self.actionChoose_File = QtWidgets.QAction(SignalViewer)
         self.actionChoose_File.setObjectName("actionChoose_File")
@@ -278,9 +271,9 @@ class Ui_SignalViewer(object):
         # self.tabwidget.addTab(label1, "Tab 1")
         # self.tabwidget.addTab(label2, "Tab 2")
         self.tabwidget.setParent(self.centralwidget)
-        self.tabwidget.resize(SignalViewer.width(),SignalViewer.height())
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
         self.tabwidget.show()
-        self.tabwidget.add_new_viewer()
+        
 
         # #signal 1 == channel 1
         # self.channelLabel1 = QtWidgets.QLabel("Channel 1")
@@ -402,7 +395,7 @@ class Ui_SignalViewer(object):
     
     def windowResize(self,event) : 
         # self.backGround.setGeometry(0,60,SignalViewer.width(),SignalViewer.height())
-        self.tabwidget.resize(SignalViewer.width(),SignalViewer.height())
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
         # self.signal1.setGeometry(QtCore.QRect(5, 30,int((SignalViewer.width() - 20) / 2 ),170))
         # self.signal4.setGeometry(self.signal1.width() + 10, 30,self.signal1.width(),170)
         # self.signal2.setGeometry(QtCore.QRect(5, self.signal1.height() + 55,  self.signal1.width() ,170))
@@ -413,7 +406,6 @@ class Ui_SignalViewer(object):
 
 
     def enableWidgets(self) : 
-        self.backGround.hide()
         self.actionPause.setEnabled(True)
         self.actionResume.setEnabled(True)
         self.actionzoom_in_h.setEnabled(True)
@@ -477,70 +469,78 @@ class Ui_SignalViewer(object):
         if fileName == '' :
             self.warnDialog("please Select data files")
             return
-        if(self.plot1 == None) :
-            self.enableWidgets()
-            self.activePlots.append(1)
-            # read csv file 
-            csvFile1 = pd.read_csv(fileName)
-            # exctract data to draw signal 1
-            self.time1 = csvFile1.iloc[:,0]
-            self.volts1 = csvFile1.iloc[:,1]
-            self.sampleTime1 = self.time1[1] - self.time1[0]
-            yrange = self.volts1[len(self.volts1) - 1] - self.volts1[0]
-            self.scrollStep1_x = 10 * self.sampleTime1
-            self.scrollStep1_y = yrange / 10
-            #plot spectogram
-            self.drawSpectrogram(self.signal4, self.volts1, 1 / self.sampleTime1)
-            # plot the signal 
-            self.plot1 = self.signal1.addPlot()
-            self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
-            self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
-            self.timer1.timeout.connect(self.update1)
-            self.timer1.start(50)
-        else : 
-            if self.plot2 == None : 
-                self.enableWidgets()
-                self.activePlots.append(2)
-                # read csv file
-                csvFile2 = pd.read_csv(fileName)
-                # exctract data to plot the signal 
-                self.time2 = csvFile2.iloc[:,0]
-                self.volts2 = csvFile2.iloc[:,1]
-                yrange = self.volts2[len(self.volts2) - 1] - self.volts2[0]
-                self.sampleTime2 = self.time2[1] - self.time2[0]
-                self.scrollStep2_x = 10 * self.sampleTime2
-                self.scrollStep2_y = yrange / 10
-                #plot spectogram
-                self.drawSpectrogram(self.signal5, self.volts2, 1 / self.sampleTime2)
-                # plot the signal 
-                self.plot2 = self.signal2.addPlot()
-                self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
-                self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
-                self.timer2.timeout.connect(self.update2)
-                self.timer2.start(50)
-            else : 
-                if self.plot3 == None : 
-                    self.enableWidgets()
-                    self.activePlots.append(3)
-                    # read csv file
-                    csvFile3 = pd.read_csv(fileName)
-                    # exctract data to draw signal 3
-                    self.time3 = csvFile3.iloc[:,0]
-                    self.volts3 = csvFile3.iloc[:,1]
-                    yrange = self.volts3[len(self.volts3) - 1] - self.volts3[0]
-                    self.sampleTime3 = self.time3[1] - self.time3[0]
-                    self.scrollStep3_x = 10 * self.sampleTime3
-                    self.scrollStep3_y = yrange / 10
-                    #plot spectogram
-                    self.drawSpectrogram(self.signal6, self.volts3, 1 / self.sampleTime3)
-                    # plot the signal 
-                    self.plot3 = self.signal3.addPlot()
-                    self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
-                    self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
-                    self.timer3.timeout.connect(self.update3)
-                    self.timer3.start(50)
-                else : 
-                    self.warnDialog("please clear one of the signals first")
+        
+        # read csv file 
+        csvFile1 = pd.read_csv(fileName)
+        # exctract data to draw signal 1
+        timeData = csvFile1.iloc[:,0]
+        voltsData = csvFile1.iloc[:,1]
+        self.tabwidget.add_new_viewer(timeData, voltsData)
+        self.enableWidgets()
+        # if(self.plot1 == None) :
+        #     self.enableWidgets()
+        #     self.activePlots.append(1)
+        #     # read csv file 
+        #     csvFile1 = pd.read_csv(fileName)
+        #     # exctract data to draw signal 1
+        #     self.time1 = csvFile1.iloc[:,0]
+        #     self.volts1 = csvFile1.iloc[:,1]
+        #     self.sampleTime1 = self.time1[1] - self.time1[0]
+        #     yrange = self.volts1[len(self.volts1) - 1] - self.volts1[0]
+        #     self.scrollStep1_x = 10 * self.sampleTime1
+        #     self.scrollStep1_y = yrange / 10
+        #     #plot spectogram
+        #     self.drawSpectrogram(self.signal4, self.volts1, 1 / self.sampleTime1)
+        #     # plot the signal 
+        #     self.plot1 = self.signal1.addPlot()
+        #     self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
+        #     self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
+        #     self.timer1.timeout.connect(self.update1)
+        #     self.timer1.start(50)
+        # else : 
+        #     if self.plot2 == None : 
+        #         self.enableWidgets()
+        #         self.activePlots.append(2)
+        #         # read csv file
+        #         csvFile2 = pd.read_csv(fileName)
+        #         # exctract data to plot the signal 
+        #         self.time2 = csvFile2.iloc[:,0]
+        #         self.volts2 = csvFile2.iloc[:,1]
+        #         yrange = self.volts2[len(self.volts2) - 1] - self.volts2[0]
+        #         self.sampleTime2 = self.time2[1] - self.time2[0]
+        #         self.scrollStep2_x = 10 * self.sampleTime2
+        #         self.scrollStep2_y = yrange / 10
+        #         #plot spectogram
+        #         self.drawSpectrogram(self.signal5, self.volts2, 1 / self.sampleTime2)
+        #         # plot the signal 
+        #         self.plot2 = self.signal2.addPlot()
+        #         self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
+        #         self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
+        #         self.timer2.timeout.connect(self.update2)
+        #         self.timer2.start(50)
+        #     else : 
+        #         if self.plot3 == None : 
+        #             self.enableWidgets()
+        #             self.activePlots.append(3)
+        #             # read csv file
+        #             csvFile3 = pd.read_csv(fileName)
+        #             # exctract data to draw signal 3
+        #             self.time3 = csvFile3.iloc[:,0]
+        #             self.volts3 = csvFile3.iloc[:,1]
+        #             yrange = self.volts3[len(self.volts3) - 1] - self.volts3[0]
+        #             self.sampleTime3 = self.time3[1] - self.time3[0]
+        #             self.scrollStep3_x = 10 * self.sampleTime3
+        #             self.scrollStep3_y = yrange / 10
+        #             #plot spectogram
+        #             self.drawSpectrogram(self.signal6, self.volts3, 1 / self.sampleTime3)
+        #             # plot the signal 
+        #             self.plot3 = self.signal3.addPlot()
+        #             self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
+        #             self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
+        #             self.timer3.timeout.connect(self.update3)
+        #             self.timer3.start(50)
+        #         else : 
+        #             self.warnDialog("please clear one of the signals first")
           
         
     def update1(self) :
@@ -685,22 +685,19 @@ class Ui_SignalViewer(object):
     
 
     def pause(self) :
-        if self.selectedSignal == 0 : self.warnDialog("please choose signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal)) # self.timer1
-            if timer.isActive() : 
-                timer.stop()
-                ranges = getattr(getattr(self, "plot" + str(self.selectedSignal)), "viewRange")() # self.plot.viewRange()
-                setattr(self, "xRangeOfSignal" + str(self.selectedSignal),ranges[0])
-                setattr(self, "yRangeOfSignal" + str(self.selectedSignal),ranges[1])
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() : 
+                currentTab.timer.stop()
+                # ranges = getattr(getattr(self, "plot" + str(self.selectedSignal)), "viewRange")() # self.plot.viewRange()
+                # setattr(self, "xRangeOfSignal" + str(self.selectedSignal),ranges[0])
+                # setattr(self, "yRangeOfSignal" + str(self.selectedSignal),ranges[1])
+
                     
 
     def resume(self) : 
-        if self.selectedSignal == 0 : self.warnDialog("please choose signal")
-        else : 
-            timer = getattr(self, "timer" + str(self.selectedSignal))
-            if timer.isActive() == False : 
-                timer.start()
+        currentTab = self.tabwidget.currentWidget()
+        if currentTab.timer.isActive() == False : 
+                currentTab.timer.start()
         
         
     def warnDialog(self,message):
