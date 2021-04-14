@@ -44,10 +44,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.scrollStep_y = yrange / 10
         
         self.timer = QtCore.QTimer()
-
-        #start plotting the data 
-        self.startPlotting()
-        self.drawSpectrogram()
         
         # sliders values 
         self._value1 = 0
@@ -60,6 +56,15 @@ class centralWidget(QtWidgets.QWidget) :
         self._value8 = 0
         self._value9 = 0
         self._value10 = 0
+
+        #Pallete of spectrogram *Pallete1 as deafult
+        self.RGB_Pallete_1 = (0, 182, 188, 255)
+        self.RGB_Pallete_2 = (246, 111, 0, 255)
+        self.RGB_Pallete_3 = (75, 0, 113, 255)
+
+        #start plotting the data 
+        self.startPlotting()
+        self.drawSpectrogram()
         
     def startPlotting(self) :
         # plot original signal 
@@ -104,8 +109,8 @@ class centralWidget(QtWidgets.QWidget) :
         hist.gradient.restoreState({
             'mode':
             'rgb',
-            'ticks': [(0.5, (0, 182, 188, 255)), (1.0, (246, 111, 0, 255)),
-                      (0.0, (75, 0, 113, 255))]
+            'ticks': [(0.5, self.RGB_Pallete_1), (1.0, self.RGB_Pallete_2),
+                      (0.0, self.RGB_Pallete_3)]
         })
         img.setImage(Sxx)
         img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))

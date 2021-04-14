@@ -59,10 +59,6 @@ class mainWindow(QtWidgets.QMainWindow) :
     def resizeEvent(self, ev) : 
         self.windowResizeMethod(ev)
 
-
-
-
-
 class Ui_SignalViewer(object):
 
     def __init__(self):
@@ -191,10 +187,23 @@ class Ui_SignalViewer(object):
         self.actionClear.triggered.connect(self.clearSignal)
         self.actionClear.setEnabled(False)
 
+        # change color of spectrogram
+        self.labelForComboBox = QtWidgets.QLabel("spectroGram : ")
+        self.actionClear.setEnabled(False)
+
         # select Folder
         self.actionChoose_File = QtWidgets.QAction(SignalViewer)
         self.actionChoose_File.setObjectName("actionChoose_File")
         self.actionChoose_File.triggered.connect(self.selectFolder)
+
+        self.colorMode = QtWidgets.QComboBox()
+        self.colorMode.addItem("palette 1")
+        self.colorMode.addItem("palette 2")
+        self.colorMode.addItem("palette 3")
+        self.colorMode.addItem("palette 4")
+        self.colorMode.addItem("palette 5")
+        self.colorMode.currentTextChanged.connect(self.colorModeChanged)
+        self.colorMode.setEnabled(False)
 
         self.menuFile.addAction(self.actionChoose_File)
         self.menubar.addAction(self.menuFile.menuAction())
@@ -208,6 +217,9 @@ class Ui_SignalViewer(object):
         self.toolBar_2.addAction(self.actionPause)
         self.toolBar_2.addAction(self.actionResume)
         self.toolBar_2.addAction(self.actionClear)
+        self.toolBar_2.addSeparator()
+        self.toolBar_2.addWidget(self.labelForComboBox)
+        self.toolBar_2.addWidget(self.colorMode)
 
         # tab widget 
         self.tabwidget = newTab()
@@ -246,8 +258,6 @@ class Ui_SignalViewer(object):
     def windowResize(self,event) : 
         self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
 
-
-
     def enableWidgets(self) : 
         self.actionPause.setEnabled(True)
         self.actionResume.setEnabled(True)
@@ -257,6 +267,7 @@ class Ui_SignalViewer(object):
         self.actionzoom_out_v.setEnabled(True)
         self.actionsave_file.setEnabled(True)
         self.actionClear.setEnabled(True)
+        self.colorMode.setEnabled(True)
     
     def spaceClicked(self,ev) :
         if self.isPaused : 
@@ -265,8 +276,6 @@ class Ui_SignalViewer(object):
         else : 
             self.pause()
             self.isPaused = not self.isPaused
-
-
 
     def clearSignal(self) :
         if self.selectedSignal == 0 : self.warnDialog("please select signal")
@@ -351,14 +360,12 @@ class Ui_SignalViewer(object):
                 ranges = currentTab.plot.viewRange()
                 currentTab.xRangeOfSignal = ranges[0]
                 currentTab.yRangeOfSignal = ranges[1]
-
-                    
+                   
     def resume(self) : 
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False : 
                 currentTab.timer.start()
-        
-        
+              
     def warnDialog(self,message):
         window = QtWidgets.QMessageBox()
         window.setWindowTitle("error")
@@ -458,6 +465,33 @@ class Ui_SignalViewer(object):
         self.scroll_left()
     def key_right(self,ev):
         self.scroll_right()	
+
+    def colorModeChanged(self,mode) : 
+        currentTab = self.tabwidget.currentWidget()
+        currentTab.SpectrogramViewer.clear()
+        if mode == "palette 1" : 
+            currentTab.RGB_Pallete_1 = (0, 182, 188, 255)
+            currentTab.RGB_Pallete_2 = (246, 111, 0, 255)
+            currentTab.RGB_Pallete_3 = (75, 0, 113, 255)
+        elif mode == "palette 2" :
+            currentTab.RGB_Pallete_1 = (108, 79, 60, 255)
+            currentTab.RGB_Pallete_2 = (100, 83, 148, 255)
+            currentTab.RGB_Pallete_3 = (0, 166, 140, 255)
+        elif mode == "palette 3" :
+            currentTab.RGB_Pallete_1 = (191, 216, 51, 255)
+            currentTab.RGB_Pallete_2 = (188, 108, 167, 255)
+            currentTab.RGB_Pallete_3 = (235, 225, 223, 255)
+
+        elif mode == "palette 4" : 
+            currentTab.RGB_Pallete_1 = (219, 178, 209, 255)
+            currentTab.RGB_Pallete_2 = (147, 71, 66, 255)
+            currentTab.RGB_Pallete_3 = (108, 160, 220, 255)
+        else : 
+            currentTab.RGB_Pallete_1 = (236, 219, 83, 255)
+            currentTab.RGB_Pallete_2 = (227, 65, 50, 255)
+            currentTab.RGB_Pallete_3 = (219, 178, 209, 255)
+
+        currentTab.drawSpectrogram()
 
 if __name__ == "__main__":
     import sys
