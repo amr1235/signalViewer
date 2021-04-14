@@ -269,6 +269,16 @@ class Ui_SignalViewer(object):
         self.actionClear.setEnabled(True)
         self.colorMode.setEnabled(True)
     
+    def disableWidgets(self) :
+        self.actionPause.setEnabled(False)
+        self.actionResume.setEnabled(False)
+        self.actionzoom_in_h.setEnabled(False)
+        self.actionzoom_in_v.setEnabled(False)
+        self.actionzoom_out_h.setEnabled(False)
+        self.actionzoom_out_v.setEnabled(False)
+        self.actionsave_file.setEnabled(False)
+        self.actionClear.setEnabled(False)
+        self.colorMode.setEnabled(False)
     def spaceClicked(self,ev) :
         if self.isPaused : 
             self.resume()
@@ -278,24 +288,10 @@ class Ui_SignalViewer(object):
             self.isPaused = not self.isPaused
 
     def clearSignal(self) :
-        if self.selectedSignal == 0 : self.warnDialog("please select signal")
-        else : 
-            activePlots = getattr(self, "activePlots")
-            index = activePlots.remove(self.selectedSignal)
-            getattr(getattr(self,"signal" + str(self.selectedSignal)) , "clear")() # self.signal1.clear()
-            getattr(getattr(self,"signal" + str(self.selectedSignal + 3)) , "clear")() # self.signal1.clear()
-            setattr(self, "plotIndex" + str(self.selectedSignal), 200)     # self.plotIndex = 200
-            setattr(self, "xPointer" + str(self.selectedSignal), 0)        # self.xPointer  = 0
-            setattr(self, "plot" + str(self.selectedSignal), None)         # self.plot = None
-            setattr(self, "scrollStep" + str(self.selectedSignal) + "_x", None)   # self.scrollStep_x = None
-            setattr(self, "scrollStep" + str(self.selectedSignal) + "_y", None)   # self.scrollStep_y = None
-            setattr(self, "xRangeStack" + str(self.selectedSignal), [])    # self.xRangeStack = []
-            setattr(self, "yRangeStack", [])                               # self.yRangeStack = []
-            setattr(self, "xRangeOfSignal" + str(self.selectedSignal), []) # self.xRangeOfSignal = []
-            setattr(self, "yRangeOfSignal", [])                            # self.yRangeOfSignal = []
-            getattr(getattr(self,"timer"+str(self.selectedSignal)), "stop")() # self.timer.stop()
-            getattr(getattr(self,"timer"+str(self.selectedSignal)), "setInterval")(0) #self.timer.setInterval(0)
-        
+        currentIndex = self.tabwidget.currentIndex()
+        self.tabwidget.removeTab(currentIndex)
+        if self.tabwidget.count() == 0 : 
+            self.disableWidgets()
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
@@ -441,6 +437,8 @@ class Ui_SignalViewer(object):
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False :
             rangeOfX = currentTab.xRangeOfSignal
+            if rangeOfX[0] <= 0 : 
+                return
             rangeOfX[0] -= currentTab.scrollStep_x
             rangeOfX[1] -= currentTab.scrollStep_x
             currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
