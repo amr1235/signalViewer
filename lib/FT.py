@@ -12,6 +12,7 @@ class fourierTransform() :
         self.data = data 
         self.sampling_rate = sampling_rate
         self.data_fft = np.fft.fft(self.data)
+        self.dataAfterAmplification = list(self.data_fft).copy()
         # we will devide the range of freq into 10 ranges 
         # fmax = fsample / 2 
         self.maxFrequancy = self.sampling_rate / 2 
@@ -20,15 +21,14 @@ class fourierTransform() :
         bandWidthOfEachRange = int(self.maxFrequancy / 10)
         self.rangesOfFrequancy = [] # [[0,49],[50,99],...,[]] 10 elements
         start = 0
-        end = bandWidthOfEachRange - 1
-        for r in range(0,len(self.frequencies),bandWidthOfEachRange) : 
+        end = 0
+        for r in range(0,10) : 
+            start = r * bandWidthOfEachRange
+            end = start + bandWidthOfEachRange 
             self.rangesOfFrequancy.append([start,end])
-            start = start + bandWidthOfEachRange
-            end = end + bandWidthOfEachRange - 1
-    
     # gain function takes 10 gains and it multiply each gain with the corresponding band  
     def gain(self,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10) :
-        self.dataAfterAmplification = self.data_fft
+        
         for i in range(10) :
             bandWidth = self.rangesOfFrequancy[i]
             start = bandWidth[0]
@@ -46,8 +46,8 @@ class fourierTransform() :
     # get complex-number array and do inverse transform on it
     def fn_InverceFourier(self, complex_arr):
         invrs = np.fft.ifft(complex_arr) #[21.0,0.00000j] so we remove imaginary part
-        real_data = list(invrs.real) #sound file data
-        return real_data
+        self.real_data = list(invrs.real) #sound file data
+        return self.real_data
 
 # offers utility need in sound file package
 class soundfileUtility():
@@ -68,4 +68,3 @@ class soundfileUtility():
     @staticmethod
     def fn_PlaySoundFile(file_name):
         playsound(file_name)
-
