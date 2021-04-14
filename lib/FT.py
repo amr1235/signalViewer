@@ -27,7 +27,7 @@ class fourierTransform() :
             end = end + bandWidthOfEachRange - 1
     
     # gain function takes 10 gains and it multiply each gain with the corresponding band  
-    def gain(self,g1=1,g2=1,g3=1,g4=1,g5=1,g6=1,g7=1,g8=1,g9=1,g10=1) :
+    def gain(self,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10) :
         self.dataAfterAmplification = self.data_fft
         for i in range(10) :
             bandWidth = self.rangesOfFrequancy[i]

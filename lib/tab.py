@@ -46,16 +46,16 @@ class centralWidget(QtWidgets.QWidget) :
         self.timer = QtCore.QTimer()
         
         # sliders values 
-        self._value1 = 0
-        self._value2 = 0
-        self._value3 = 0
-        self._value4 = 0
-        self._value5 = 0
-        self._value6 = 0
-        self._value7 = 0
-        self._value8 = 0
-        self._value9 = 0
-        self._value10 = 0
+        self._value1 = 1
+        self._value2 = 1
+        self._value3 = 1
+        self._value4 = 1
+        self._value5 = 1
+        self._value6 = 1
+        self._value7 = 1
+        self._value8 = 1
+        self._value9 = 1
+        self._value10 = 1
 
         #Pallete of spectrogram *Pallete1 as deafult
         self.RGB_Pallete_1 = (0, 182, 188, 255)
@@ -68,15 +68,19 @@ class centralWidget(QtWidgets.QWidget) :
         
     def startPlotting(self) :
         # plot original signal 
+        # self.plot = self.OriginalSignalViewer.addPlot()
+        # self.plot.plot(self.timeData[self.xPointer:self.plotIndex],self.originalVoltsData[self.xPointer:self.plotIndex])
+        # self.plot.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
         self.plot = self.OriginalSignalViewer.addPlot()
-        self.plot.plot(self.timeData[self.xPointer:self.plotIndex],self.originalVoltsData[self.xPointer:self.plotIndex])
-        self.plot.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
+        self.plot.plot(self.timeData,self.originalVoltsData)
         # plot data After Editing
+        # self.plot1 = self.EditedSignalViewer.addPlot()
+        # self.plot1.plot(self.timeData[self.xPointer:self.plotIndex],self.editedVoltsData[self.xPointer:self.plotIndex])
         self.plot1 = self.EditedSignalViewer.addPlot()
-        self.plot1.plot(self.timeData[self.xPointer:self.plotIndex],self.editedVoltsData[self.xPointer:self.plotIndex])
-        self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
-        self.timer.timeout.connect(self.update)
-        self.timer.start(50)
+        self.plot1.plot(self.timeData,self.editedVoltsData)
+        # self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
+        # self.timer.timeout.connect(self.update)
+        # self.timer.start(50)
     
     def update(self) :
         self.OriginalSignalViewer.clear()
@@ -278,9 +282,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addLayout(self.gridLayout_7, 1, 0, 1, 10)
         self.Slider1 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider1.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider1.setMinimum(1)
+        self.Slider1.setMinimum(0)
         self.Slider1.setMaximum(5)
-        self.Slider1.setSliderPosition(0)
+        self.Slider1.setSliderPosition(1)
         self.Slider1.setOrientation(QtCore.Qt.Vertical)
         self.Slider1.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider1.setTickInterval(1)
@@ -288,8 +292,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider1, 0, 0, 1, 1)
         self.Slider10 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider10.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider10.setMinimum(1)
+        self.Slider10.setMinimum(0)
         self.Slider10.setMaximum(5)
+        self.Slider10.setSliderPosition(1)
         self.Slider10.setOrientation(QtCore.Qt.Vertical)
         self.Slider10.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider10.setTickInterval(1)
@@ -297,8 +302,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider10, 0, 9, 1, 1)
         self.Slide6 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slide6.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slide6.setMinimum(1)
+        self.Slide6.setMinimum(0)
         self.Slide6.setMaximum(5)
+        self.Slide6.setSliderPosition(1)
         self.Slide6.setOrientation(QtCore.Qt.Vertical)
         self.Slide6.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slide6.setTickInterval(1)
@@ -306,8 +312,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slide6, 0, 5, 1, 1)
         self.Slider8 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider8.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider8.setMinimum(1)
+        self.Slider8.setMinimum(0)
         self.Slider8.setMaximum(5)
+        self.Slider8.setSliderPosition(1)
         self.Slider8.setOrientation(QtCore.Qt.Vertical)
         self.Slider8.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider8.setTickInterval(1)
@@ -315,9 +322,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider8, 0, 7, 1, 1)
         self.Slider3 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider3.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider3.setMinimum(1)
+        self.Slider3.setMinimum(0)
         self.Slider3.setMaximum(5)
-        self.Slider3.setPageStep(10)
+        self.Slider3.setSliderPosition(1)
         self.Slider3.setOrientation(QtCore.Qt.Vertical)
         self.Slider3.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider3.setTickInterval(1)
@@ -325,19 +332,19 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider3, 0, 2, 1, 1)
         self.Slider2 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider2.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider2.setToolTip("")
-        self.Slider2.setMinimum(1)
+        self.Slider2.setMinimum(0)
         self.Slider2.setMaximum(5)
+        self.Slider2.setSliderPosition(1)
         self.Slider2.setOrientation(QtCore.Qt.Vertical)
-        self.Slider2.setInvertedAppearance(False)
         self.Slider2.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider2.setTickInterval(1)
         self.Slider2.setObjectName("Slider2")
         self.gridLayout.addWidget(self.Slider2, 0, 1, 1, 1)
         self.Slider9 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider9.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider9.setMinimum(1)
+        self.Slider9.setMinimum(0)
         self.Slider9.setMaximum(5)
+        self.Slider9.setSliderPosition(1)
         self.Slider9.setOrientation(QtCore.Qt.Vertical)
         self.Slider9.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider9.setTickInterval(1)
@@ -345,8 +352,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider9, 0, 8, 1, 1)
         self.Slider5 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider5.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider5.setMinimum(1)
+        self.Slider5.setMinimum(0)
         self.Slider5.setMaximum(5)
+        self.Slider5.setSliderPosition(1)
         self.Slider5.setOrientation(QtCore.Qt.Vertical)
         self.Slider5.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider5.setTickInterval(1)
@@ -354,8 +362,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider5, 0, 4, 1, 1)
         self.Slider4 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider4.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider4.setMinimum(1)
+        self.Slider4.setMinimum(0)
         self.Slider4.setMaximum(5)
+        self.Slider4.setSliderPosition(1)    
         self.Slider4.setProperty("value", 1)
         self.Slider4.setOrientation(QtCore.Qt.Vertical)
         self.Slider4.setTickPosition(QtWidgets.QSlider.TicksAbove)
@@ -364,8 +373,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addWidget(self.Slider4, 0, 3, 1, 1)
         self.Slider7 = QtWidgets.QSlider(self.SignalEditorGroupBox)
         self.Slider7.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-        self.Slider7.setMinimum(1)
+        self.Slider7.setMinimum(0)
         self.Slider7.setMaximum(5)
+        self.Slider7.setSliderPosition(1)
         self.Slider7.setOrientation(QtCore.Qt.Vertical)
         self.Slider7.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.Slider7.setTickInterval(1)
@@ -399,17 +409,33 @@ class centralWidget(QtWidgets.QWidget) :
         self.setTabOrder(self.Slider10, self.OriginalSignalViewer)
         self.setTabOrder(self.OriginalSignalViewer, self.EditedSignalViewer)
         self.setTabOrder(self.EditedSignalViewer, self.SpectrogramViewer)
+
+        #set text
+        _translate = QtCore.QCoreApplication.translate
+        self.label1.setText(_translate("MainWindow", "TextLabel"))
+        self.label2.setText(_translate("MainWindow", "TextLabel"))
+        self.label3.setText(_translate("MainWindow", "TextLabel"))
+        self.label4.setText(_translate("MainWindow", "TextLabel"))
+        self.label5.setText(_translate("MainWindow", "TextLabel"))
+        self.label6.setText(_translate("MainWindow", "TextLabel"))
+        self.label7.setText(_translate("MainWindow", "TextLabel"))
+        self.label8.setText(_translate("MainWindow", "TextLabel"))
+        self.label9.setText(_translate("MainWindow", "TextLabel"))
+        self.label10.setText(_translate("MainWindow", "TextLabel"))
     
     def fn_slider1Value(self, value1=1):
         self._value1 = value1
+        print(value1)
         self.process()
 
     def fn_slider2Value(self, value2=1):
         self._value2 = value2
+        print(value2)
         self.process()
 
     def fn_slider3Value(self, value3=1):
         self._value3 = value3
+        print(value3)
         self.process()
 
     def fn_slider4Value(self, value4=1):
@@ -442,16 +468,24 @@ class centralWidget(QtWidgets.QWidget) :
         self.process()
 
     def process(self): #(freq,complex_data,reals,time,np.abs(complex_data))
-        if self.timer.isActive() : return
+        # if self.timer.isActive() : return
+
         ft = fourierTransform(self.originalVoltsData, 1 / self.sampleTime)
         complex_data = ft.gain(self._value1,self._value2,self._value3,self._value4,
         self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         reals = ft.fn_InverceFourier(complex_data)
+        print(self._value1,self._value2,self._value3,self._value4,
+        self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         #update Plot
+        # self.EditedSignalViewer.clear()
+        # self.plot1 = self.EditedSignalViewer.addPlot()
+        # self.plot1.plot(self.timeData[0:self.plotIndex],reals[0:self.plotIndex])
+        # self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
+        # self.editedVoltsData = np.array(reals)
         self.EditedSignalViewer.clear()
         self.plot1 = self.EditedSignalViewer.addPlot()
-        self.plot1.plot(self.timeData[0:self.plotIndex],reals[0:self.plotIndex])
-        self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
+        self.plot1.plot(self.timeData,reals)
+        # self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
         self.editedVoltsData = np.array(reals)
         # update spectrogram 
         self.SpectrogramViewer.clear()
