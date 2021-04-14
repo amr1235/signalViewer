@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import random
 from PyQt5.QtGui import QPixmap
 from lib.tab import newTab
+from lib.FT import soundfileUtility
 
 
 
@@ -289,83 +290,28 @@ class Ui_SignalViewer(object):
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
-        directory = dialog.getOpenFileName(None,'select file','c:\\','csv files (*.csv)')
+        directory = dialog.getOpenFileName(None,'select file','c:\\','csv files (*.csv) ;; sound files (*.wav)')
         fileName = directory[0]
         if fileName == '' :
             self.warnDialog("please Select data files")
             return
-        
-        # read csv file 
-        csvFile1 = pd.read_csv(fileName)
-        # exctract data to draw signal 1
-        timeData = csvFile1.iloc[:,0]
-        voltsData = csvFile1.iloc[:,1]
+            timeData = None
+            voltsData = None
+        if fileName.split('.')[1] == 'wav' : 
+            # sound file
+            voltsData,sampling_rate =  soundfileUtility.fn_ReadFile(fileName)
+            samplingTime = 1 / sampling_rate
+            timeData = [i*samplingTime for i in range(len(voltsData))]
+        elif fileName.split('.')[1] == 'csv' :
+            # read csv file 
+            csvFile1 = pd.read_csv(fileName)
+            # exctract data to draw signal 1
+            timeData = csvFile1.iloc[:,0]
+            voltsData = csvFile1.iloc[:,1]
+
+       
         self.tabwidget.add_new_viewer(timeData, voltsData)
         self.enableWidgets()
-        # if(self.plot1 == None) :
-        #     self.enableWidgets()
-        #     self.activePlots.append(1)
-        #     # read csv file 
-        #     csvFile1 = pd.read_csv(fileName)
-        #     # exctract data to draw signal 1
-        #     self.time1 = csvFile1.iloc[:,0]
-        #     self.volts1 = csvFile1.iloc[:,1]
-        #     self.sampleTime1 = self.time1[1] - self.time1[0]
-        #     yrange = self.volts1[len(self.volts1) - 1] - self.volts1[0]
-        #     self.scrollStep1_x = 10 * self.sampleTime1
-        #     self.scrollStep1_y = yrange / 10
-        #     #plot spectogram
-        #     self.drawSpectrogram(self.signal4, self.volts1, 1 / self.sampleTime1)
-        #     # plot the signal 
-        #     self.plot1 = self.signal1.addPlot()
-        #     self.plot1.plot(self.time1[self.xPointer1:self.plotIndex1],self.volts1[self.xPointer1:self.plotIndex1])
-        #     self.plot1.setXRange(self.time1[self.xPointer1],self.time1[self.plotIndex1])
-        #     self.timer1.timeout.connect(self.update1)
-        #     self.timer1.start(50)
-        # else : 
-        #     if self.plot2 == None : 
-        #         self.enableWidgets()
-        #         self.activePlots.append(2)
-        #         # read csv file
-        #         csvFile2 = pd.read_csv(fileName)
-        #         # exctract data to plot the signal 
-        #         self.time2 = csvFile2.iloc[:,0]
-        #         self.volts2 = csvFile2.iloc[:,1]
-        #         yrange = self.volts2[len(self.volts2) - 1] - self.volts2[0]
-        #         self.sampleTime2 = self.time2[1] - self.time2[0]
-        #         self.scrollStep2_x = 10 * self.sampleTime2
-        #         self.scrollStep2_y = yrange / 10
-        #         #plot spectogram
-        #         self.drawSpectrogram(self.signal5, self.volts2, 1 / self.sampleTime2)
-        #         # plot the signal 
-        #         self.plot2 = self.signal2.addPlot()
-        #         self.plot2.plot(self.time2[self.xPointer2:self.plotIndex2],self.volts2[self.xPointer2:self.plotIndex2])
-        #         self.plot2.setXRange(self.time2[self.xPointer2],self.time2[self.plotIndex2])
-        #         self.timer2.timeout.connect(self.update2)
-        #         self.timer2.start(50)
-        #     else : 
-        #         if self.plot3 == None : 
-        #             self.enableWidgets()
-        #             self.activePlots.append(3)
-        #             # read csv file
-        #             csvFile3 = pd.read_csv(fileName)
-        #             # exctract data to draw signal 3
-        #             self.time3 = csvFile3.iloc[:,0]
-        #             self.volts3 = csvFile3.iloc[:,1]
-        #             yrange = self.volts3[len(self.volts3) - 1] - self.volts3[0]
-        #             self.sampleTime3 = self.time3[1] - self.time3[0]
-        #             self.scrollStep3_x = 10 * self.sampleTime3
-        #             self.scrollStep3_y = yrange / 10
-        #             #plot spectogram
-        #             self.drawSpectrogram(self.signal6, self.volts3, 1 / self.sampleTime3)
-        #             # plot the signal 
-        #             self.plot3 = self.signal3.addPlot()
-        #             self.plot3.plot(self.time3[self.xPointer3:self.plotIndex3],self.volts3[self.xPointer3:self.plotIndex3])
-        #             self.plot3.setXRange(self.time3[self.xPointer3],self.time3[self.plotIndex3])
-        #             self.timer3.timeout.connect(self.update3)
-        #             self.timer3.start(50)
-        #         else : 
-        #             self.warnDialog("please clear one of the signals first")
         
     def generateReport(self) : 
             if len(self.activePlots) == 3: 
@@ -490,9 +436,6 @@ class Ui_SignalViewer(object):
                 ranges = currentTab.plot.viewRange()
                 currentTab.xRangeOfSignal = ranges[0]
                 currentTab.yRangeOfSignal = ranges[1]
-                # ranges = getattr(getattr(self, "plot" + str(self.selectedSignal)), "viewRange")() # self.plot.viewRange()
-                # setattr(self, "xRangeOfSignal" + str(self.selectedSignal),ranges[0])
-                # setattr(self, "yRangeOfSignal" + str(self.selectedSignal),ranges[1])
 
                     
     def resume(self) : 
