@@ -35,9 +35,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.xRangeStack = []
         self.yRangeStack = []
 
-        self.xRangeOfSignal = [] # [from , to] 
-        self.yRangeOfSignal = []
-
         self.sampleTime = timeData[1] - timeData[0]
         yrange = voltsData[len(voltsData) - 1] - voltsData[0]
         self.scrollStep_x = 10 * self.sampleTime
@@ -65,6 +62,8 @@ class centralWidget(QtWidgets.QWidget) :
         #start plotting the data 
         self.startPlotting()
         self.drawSpectrogram()
+        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to] 
+        self.yRangeOfSignal = self.plot.viewRange()[1]
         
     def startPlotting(self) :
         # plot original signal 
@@ -485,7 +484,8 @@ class centralWidget(QtWidgets.QWidget) :
         self.EditedSignalViewer.clear()
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.plot(self.timeData,reals)
-        # self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
+        self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
+        self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
         self.editedVoltsData = np.array(reals)
         # update spectrogram 
         self.SpectrogramViewer.clear()

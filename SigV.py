@@ -443,7 +443,7 @@ class Ui_SignalViewer(object):
             rangeOfX[1] -= currentTab.scrollStep_x
             currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
-            currentTab.xRangeStack = [rangeOfX[0],rangeOfX[1]]
+            currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
 
     def scroll_right(self) :
         currentTab = self.tabwidget.currentWidget()
@@ -453,7 +453,7 @@ class Ui_SignalViewer(object):
             rangeOfX[1] += currentTab.scrollStep_x
             currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
-            currentTab.xRangeStack = [rangeOfX[0],rangeOfX[1]]
+            currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
 
     def key_up(self,ev) : 
         self.scroll_up()
