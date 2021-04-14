@@ -313,121 +313,36 @@ class Ui_SignalViewer(object):
         self.tabwidget.add_new_viewer(timeData, voltsData)
         self.enableWidgets()
         
-    def generateReport(self) : 
-            if len(self.activePlots) == 3: 
-                fig, (sunbPlot1, sunbPlot2, sunbPlot3, sunbPlot4, sunbPlot5, sunbPlot6) = plt.subplots(6)
-                fig.suptitle('Axes values are scaled individually by default')
+    def generateReport(self) :
+        currentTab = self.tabwidget.currentWidget()
+        fig,(subPlot1,subPlot2,subPlot3) = plt.subplots(3)
+        fig.suptitle('Data Analysis')
 
-                sunbPlot1.plot(self.time1, self.volts1, color="rEd")
-                sunbPlot2.specgram(self.volts1,int(1 / self.sampleTime1))
+        subPlot1.plot(currentTab.timeData, currentTab.originalVoltsData, color="rEd")
+        subPlot2.specgram(currentTab.editedVoltsData,int(1 / currentTab.sampleTime))
+        subPlot3.plot(currentTab.timeData, currentTab.editedVoltsData, color="magenta")
 
-                sunbPlot3.plot(self.time2, self.volts2, color="magenta")
-                sunbPlot4.specgram(self.volts2, int(1 / self.sampleTime2))
+        subPlot1.title.set_text('signal Before Editing')
+        subPlot2.title.set_text('spectogram for the signal after Editing')
+        subPlot3.title.set_text('signal after Editing')
 
-                sunbPlot5.plot(self.time3, self.volts3, color="blue")
-                sunbPlot6.specgram(self.volts3, int(1 / self.sampleTime3))
+        subPlot1.set_xlabel('time (s)')
+        subPlot1.set_ylabel('volts (v)')
 
-                fig.set_figheight(12)
-                fig.set_figwidth(12)
+        subPlot3.set_xlabel('time (v)')
+        subPlot3.set_ylabel('volts (v)')
 
-                sunbPlot1.title.set_text('signal 1')
-                sunbPlot2.title.set_text('spectogram for signal 1')
-                sunbPlot3.title.set_text('signal 2')
-                sunbPlot4.title.set_text('spectogram for signal 2')
-                sunbPlot5.title.set_text('signal 3')
-                sunbPlot6.title.set_text('spectogram for signal 3')
+        fig.set_figheight(12)
+        fig.set_figwidth(12)
 
-                sunbPlot1.set_xlabel('time (s)')
-                sunbPlot3.set_xlabel('time (s)')
-                sunbPlot5.set_xlabel('time (s)')
-                sunbPlot1.set_ylabel('volts (v)')
-                sunbPlot3.set_ylabel('volts (v)')
-                sunbPlot5.set_ylabel('volts (v)')
-
-                fig.tight_layout()
-                R = list(range(0, 11))
-                z = random.choice(R)
-
-                fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
-                window = QtWidgets.QMessageBox()
-                window.setWindowTitle("done")
-                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
-                window.exec_()
-            if  len(self.activePlots) == 2 : 
-                fig, (sunbPlot1, sunbPlot2, sunbPlot3, sunbPlot4) = plt.subplots(4)
-                fig.suptitle('Axes values are scaled individually by default')
-
-                plotNumber1 = self.activePlots[0] 
-                plotNumber2 = self.activePlots[1]
-                
-                time1 = getattr(self,"time" + str(plotNumber1))
-                volts1 = getattr(self,"volts" + str(plotNumber1))
-                sampleTime1 = getattr(self, "sampleTime" + str(plotNumber1))
-
-                time2 = getattr(self,"time" + str(plotNumber2))
-                volts2 = getattr(self,"volts" + str(plotNumber2))
-                sampleTime2 = getattr(self, "sampleTime" + str(plotNumber2))
-                # sunbPlot1.plot(self.time1, self.volts1, color="rEd")
-                sunbPlot1.plot(time1, volts1, color="rEd")
-                sunbPlot2.specgram(volts1, int(1 / sampleTime1) )
-
-                sunbPlot3.plot(time2, volts2, color="magenta")
-                sunbPlot4.specgram(volts2, int(1 / sampleTime2))
-
-                fig.set_figheight(12)
-                fig.set_figwidth(12)
-
-                sunbPlot1.title.set_text('signal 1')
-                sunbPlot2.title.set_text('spectogram for signal 1')
-                sunbPlot3.title.set_text('signal 2')
-                sunbPlot4.title.set_text('spectogram for signal 2')
-
-                sunbPlot1.set_xlabel('time (s)')
-                sunbPlot3.set_xlabel('time (s)')
-                sunbPlot1.set_ylabel('volts (v)')
-                sunbPlot3.set_ylabel('volts (v)')
-
-                fig.tight_layout()
-                R = list(range(0, 11))
-                z = random.choice(R)
-                
-                fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
-                window = QtWidgets.QMessageBox()
-                window.setWindowTitle("done")
-                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
-                window.exec_()
-            if len(self.activePlots) == 1 : 
-                fig, (sunbPlot1, sunbPlot2) = plt.subplots(2)
-                fig.suptitle('Axes values are scaled individually by default')
-
-                plotNumber = self.activePlots[0]
-                time1 = getattr(self,"time" + str(plotNumber))
-                volts1 = getattr(self,"volts" + str(plotNumber))
-                sampleTime1 = getattr(self, "sampleTime" + str(plotNumber))
-
-                sunbPlot1.plot(time1, volts1, color="rEd")
-                sunbPlot2.specgram(volts1, int(1 / sampleTime1))
-
-                fig.set_figheight(12)
-                fig.set_figwidth(12)
-
-                sunbPlot1.title.set_text('signal 1')
-                sunbPlot2.title.set_text('spectogram for signal 1')
-
-                sunbPlot1.set_xlabel('time (s)')
-                sunbPlot1.set_ylabel('volts (v)')
-
-                fig.tight_layout()
-                R = list(range(0, 11))
-                z = random.choice(R)
-                
-                fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
-                window = QtWidgets.QMessageBox()
-                window.setWindowTitle("done")
-                window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
-                window.exec_()
-            if len(self.activePlots) == 0 : 
-                self.warnDialog("there are no signals")
+        fig.tight_layout()
+        R = list(range(0, 11))
+        z = random.choice(R)
+        fig.savefig(f"Report_{z}.pdf", bbox_inches='tight')
+        window = QtWidgets.QMessageBox()
+        window.setWindowTitle("done")
+        window.setText("file has been saved as " + str(f"Report_{z}.pdf")+ " in your current directory")
+        window.exec_()
 
     def pause(self) :
         currentTab = self.tabwidget.currentWidget()
