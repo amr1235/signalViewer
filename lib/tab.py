@@ -424,17 +424,14 @@ class centralWidget(QtWidgets.QWidget) :
     
     def fn_slider1Value(self, value1=1):
         self._value1 = value1
-        print(value1)
         self.process()
 
     def fn_slider2Value(self, value2=1):
         self._value2 = value2
-        print(value2)
         self.process()
 
     def fn_slider3Value(self, value3=1):
         self._value3 = value3
-        print(value3)
         self.process()
 
     def fn_slider4Value(self, value4=1):
@@ -468,13 +465,12 @@ class centralWidget(QtWidgets.QWidget) :
 
     def process(self): #(freq,complex_data,reals,time,np.abs(complex_data))
         # if self.timer.isActive() : return
-
         ft = fourierTransform(self.originalVoltsData, 1 / self.sampleTime)
         complex_data = ft.gain(self._value1,self._value2,self._value3,self._value4,
         self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         reals = ft.fn_InverceFourier(complex_data)
-        print(self._value1,self._value2,self._value3,self._value4,
-        self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
+        # print(self._value1,self._value2,self._value3,self._value4,
+        # self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         #update Plot
         # self.EditedSignalViewer.clear()
         # self.plot1 = self.EditedSignalViewer.addPlot()
@@ -485,7 +481,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.plot(self.timeData,reals)
         self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
-        self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
+        # self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
         self.editedVoltsData = np.array(reals)
         # update spectrogram 
         self.SpectrogramViewer.clear()
