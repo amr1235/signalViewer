@@ -2,10 +2,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
 import struct
-import soundfile as sf
-from playsound import playsound
+from soundfile import SoundFile as sf
+import soundfile as sff
+import winsound
 import sys
 import random
+import os
 
 class fourierTransform() : 
     def __init__(self,data,sampling_rate) :
@@ -59,18 +61,18 @@ class soundfileUtility():
     # returns sampling rate and sound data 
     @staticmethod
     def fn_ReadFile(file_name):
-        data, samplerate = sf.read(file_name)
+        data, samplerate = sff.read(file_name)
         return data, samplerate
-      
 
     # create new sound file
+    @staticmethod 
+    def fn_CreateSoundFile(arr_of_realNum, samplrate):
+        file_handle = sf("Tdfgjdli.wav", mode='w' ,samplerate= samplrate
+        ,channels=1, subtype=None, endian='FILE', format='WAV', closefd=True)
+        file_handle.write(arr_of_realNum)
+        file_handle.close()
+
     @staticmethod
-    def fn_CreateSoundFile(arr_of_realNum, samplerate):# Error is here
-        l = list(range(0, 10000))
-        m = random.choice(l)
-        sf.write(f'new_file_{m}.wav', arr_of_realNum, samplerate)
-        playsound(f'new_file_{m}.wav')
-       
-    @staticmethod
-    def fn_PlaySoundFile(file_name):
-        playsound(file_name)
+    def fn_PlaySoundFile(file_name="Tdfgjdli.wav"):
+        winsound.PlaySound(file_name, winsound.SND_FILENAME)
+        os.remove(file_name)

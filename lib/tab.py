@@ -453,7 +453,7 @@ class centralWidget(QtWidgets.QWidget) :
   
     def fn_slider6Value(self, value6=1):
         self._value6 = value6
-        print(self._value6)
+        # print(self._value6)
         self.process()
 
     def fn_slider7Value(self, value7=1):
@@ -503,6 +503,7 @@ class centralWidget(QtWidgets.QWidget) :
         reals = ft.fn_InverceFourier(complex_data)
         sound = soundfileUtility()
         sound.fn_CreateSoundFile(list(reals),int(1 / self.sampleTime))
+        sound.fn_PlaySoundFile()
         
 
 
