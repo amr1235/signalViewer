@@ -191,6 +191,15 @@ class Ui_SignalViewer(object):
         self.labelForComboBox = QtWidgets.QLabel("spectroGram : ")
         self.actionClear.setEnabled(False)
 
+        # playSound action 
+        self.playSound = QtWidgets.QAction(SignalViewer)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("icons/play.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.playSound.setIcon(icon3)
+        self.playSound.setObjectName("playSound")
+        self.playSound.triggered.connect(self.playSoundFile)
+        self.playSound.setEnabled(False)
+
         # select Folder
         self.actionChoose_File = QtWidgets.QAction(SignalViewer)
         self.actionChoose_File.setObjectName("actionChoose_File")
@@ -218,14 +227,17 @@ class Ui_SignalViewer(object):
         self.toolBar_2.addAction(self.actionResume)
         self.toolBar_2.addAction(self.actionClear)
         self.toolBar_2.addSeparator()
+        self.toolBar_2.addAction(self.playSound)
         self.toolBar_2.addWidget(self.labelForComboBox)
         self.toolBar_2.addWidget(self.colorMode)
+
 
         # tab widget 
         self.tabwidget = newTab()
         self.tabwidget.setParent(self.centralwidget)
         self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
         self.tabwidget.show()
+
         
 
         self.retranslateUi(SignalViewer)
@@ -257,6 +269,10 @@ class Ui_SignalViewer(object):
     
     def windowResize(self,event) : 
         self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
+    
+    def playSoundFile(self) :
+        currentTab = self.tabwidget.currentWidget()
+        currentTab.playSound()
 
     def enableWidgets(self) : 
         self.actionPause.setEnabled(True)
@@ -268,6 +284,7 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setEnabled(True)
         self.actionClear.setEnabled(True)
         self.colorMode.setEnabled(True)
+        self.playSound.setEnabled(True)
     
     def disableWidgets(self) :
         self.actionPause.setEnabled(False)
@@ -279,6 +296,8 @@ class Ui_SignalViewer(object):
         self.actionsave_file.setEnabled(False)
         self.actionClear.setEnabled(False)
         self.colorMode.setEnabled(False)
+        self.playSound.setEnabled(False)
+
     def spaceClicked(self,ev) :
         if self.isPaused : 
             self.resume()
@@ -292,6 +311,7 @@ class Ui_SignalViewer(object):
         self.tabwidget.removeTab(currentIndex)
         if self.tabwidget.count() == 0 : 
             self.disableWidgets()
+
     def selectFolder(self) :
         dialog = QtWidgets.QFileDialog()
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
@@ -316,6 +336,7 @@ class Ui_SignalViewer(object):
 
        
         self.tabwidget.add_new_viewer(timeData, voltsData)
+        # self.tabwidget.setCurrentIndex(self.tabwidget.numberOfTabs)
         self.enableWidgets()
         
     def generateReport(self) :
@@ -457,10 +478,13 @@ class Ui_SignalViewer(object):
 
     def key_up(self,ev) : 
         self.scroll_up()
+
     def key_down(self,ev) : 
         self.scroll_down()
+
     def key_left(self,ev) : 
         self.scroll_left()
+        
     def key_right(self,ev):
         self.scroll_right()	
 

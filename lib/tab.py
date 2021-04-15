@@ -3,7 +3,9 @@ from pyqtgraph import PlotWidget , GraphicsLayoutWidget
 from scipy import signal
 import pyqtgraph 
 import numpy as np
-from lib.FT import fourierTransform
+from lib.FT import fourierTransform,soundfileUtility
+import random
+
 
 
 
@@ -15,7 +17,11 @@ class newTab(QtWidgets.QTabWidget) :
     def add_new_viewer(self,timeData,voltsData) :
         self.numberOfTabs += 1
         centralwidget = centralWidget(timeData,voltsData)
-        self.addTab(centralwidget, "Signal " + str(self.numberOfTabs))
+        self.addTab(centralwidget, "new tab")
+        self.setCurrentWidget(centralwidget)
+        self.setCurrentIndex(self.numberOfTabs)
+    def tabRemoved(self, index) : 
+        self.numberOfTabs = self.numberOfTabs - 1
 
 # we are going to put all of our widgets inside the tab wrapped by a QWidget
 class centralWidget(QtWidgets.QWidget) :
@@ -37,7 +43,7 @@ class centralWidget(QtWidgets.QWidget) :
 
         self.sampleTime = timeData[1] - timeData[0]
         yrange = voltsData[len(voltsData) - 1] - voltsData[0]
-        self.scrollStep_x = 10 * self.sampleTime
+        self.scrollStep_x = 100 * self.sampleTime
         self.scrollStep_y = yrange / 10
         
         self.timer = QtCore.QTimer()
@@ -64,6 +70,21 @@ class centralWidget(QtWidgets.QWidget) :
         self.drawSpectrogram()
         self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to] 
         self.yRangeOfSignal = self.plot.viewRange()[1]
+
+        #set labels text
+        ft = fourierTransform(self.originalVoltsData, int(1 / self.sampleTime))
+        ranges = ft.rangesOfFrequancy 
+        _translate = QtCore.QCoreApplication.translate
+        self.label1.setText(_translate("MainWindow", str(ranges[0][0] / 1000 ) + " Khz : \n" + str(ranges[0][1] / 1000 ) + " Khz"))
+        self.label2.setText(_translate("MainWindow", str(ranges[1][0] / 1000 ) + " Khz : \n" + str(ranges[1][1] / 1000 ) + " Khz"))
+        self.label3.setText(_translate("MainWindow", str(ranges[2][0] / 1000 ) + " Khz : \n" + str(ranges[2][1] / 1000 ) + " Khz"))
+        self.label4.setText(_translate("MainWindow", str(ranges[3][0] / 1000 ) + " Khz : \n" + str(ranges[3][1] / 1000 ) + " Khz"))
+        self.label5.setText(_translate("MainWindow", str(ranges[4][0] / 1000 ) + " Khz : \n" + str(ranges[4][1] / 1000 ) + " Khz"))
+        self.label6.setText(_translate("MainWindow", str(ranges[5][0] / 1000 ) + " Khz : \n" + str(ranges[5][1] / 1000 ) + " Khz"))
+        self.label7.setText(_translate("MainWindow", str(ranges[6][0] / 1000 ) + " Khz : \n" + str(ranges[6][1] / 1000 ) + " Khz"))
+        self.label8.setText(_translate("MainWindow", str(ranges[7][0] / 1000 ) + " Khz : \n" + str(ranges[7][1] / 1000 ) + " Khz"))
+        self.label9.setText(_translate("MainWindow", str(ranges[8][0] / 1000 ) + " Khz : \n" + str(ranges[8][1] / 1000 ) + " Khz"))
+        self.label10.setText(_translate("MainWindow", str(ranges[9][0] / 1000 ) + " Khz : \n" + str(ranges[9][1] / 1000 ) + " Khz"))
         
     def startPlotting(self) :
         # plot original signal 
@@ -200,7 +221,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.setObjectName("gridLayout_7")
         self.label1 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label1.setFont(font)
@@ -208,7 +229,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label1, 0, 0, 1, 1)
         self.label2 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label2.setFont(font)
@@ -216,7 +237,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label2, 0, 1, 1, 1)
         self.label3 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label3.setFont(font)
@@ -224,7 +245,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label3, 0, 2, 1, 1)
         self.label4 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label4.setFont(font)
@@ -232,7 +253,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label4, 0, 3, 1, 1)
         self.label5 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label5.setFont(font)
@@ -240,7 +261,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label5, 0, 4, 1, 1)
         self.label6 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label6.setFont(font)
@@ -248,7 +269,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label6, 0, 5, 1, 1)
         self.label7 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label7.setFont(font)
@@ -256,7 +277,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label7, 0, 6, 1, 1)
         self.label8 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label8.setFont(font)
@@ -264,7 +285,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label8, 0, 7, 1, 1)
         self.label9 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label9.setFont(font)
@@ -272,7 +293,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout_7.addWidget(self.label9, 0, 8, 1, 1)
         self.label10 = QtWidgets.QLabel(self.SignalEditorGroupBox)
         font = QtGui.QFont()
-        font.setPointSize(7)
+        font.setPointSize(5)
         font.setBold(False)
         font.setWeight(50)
         self.label10.setFont(font)
@@ -409,18 +430,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.setTabOrder(self.OriginalSignalViewer, self.EditedSignalViewer)
         self.setTabOrder(self.EditedSignalViewer, self.SpectrogramViewer)
 
-        #set text
-        _translate = QtCore.QCoreApplication.translate
-        self.label1.setText(_translate("MainWindow", "TextLabel"))
-        self.label2.setText(_translate("MainWindow", "TextLabel"))
-        self.label3.setText(_translate("MainWindow", "TextLabel"))
-        self.label4.setText(_translate("MainWindow", "TextLabel"))
-        self.label5.setText(_translate("MainWindow", "TextLabel"))
-        self.label6.setText(_translate("MainWindow", "TextLabel"))
-        self.label7.setText(_translate("MainWindow", "TextLabel"))
-        self.label8.setText(_translate("MainWindow", "TextLabel"))
-        self.label9.setText(_translate("MainWindow", "TextLabel"))
-        self.label10.setText(_translate("MainWindow", "TextLabel"))
     
     def fn_slider1Value(self, value1=1):
         self._value1 = value1
@@ -465,7 +474,7 @@ class centralWidget(QtWidgets.QWidget) :
 
     def process(self): #(freq,complex_data,reals,time,np.abs(complex_data))
         # if self.timer.isActive() : return
-        ft = fourierTransform(self.originalVoltsData, 1 / self.sampleTime)
+        ft = fourierTransform(list(self.originalVoltsData).copy(), 1 / self.sampleTime)
         complex_data = ft.gain(self._value1,self._value2,self._value3,self._value4,
         self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         reals = ft.fn_InverceFourier(complex_data)
@@ -481,11 +490,19 @@ class centralWidget(QtWidgets.QWidget) :
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.plot(self.timeData,reals)
         self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
-        # self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
+        self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
         self.editedVoltsData = np.array(reals)
         # update spectrogram 
         self.SpectrogramViewer.clear()
         self.drawSpectrogram()
+    
+    def playSound(self) : 
+        ft = fourierTransform(list(self.originalVoltsData).copy(), 1 / self.sampleTime)
+        complex_data = ft.gain(self._value1,self._value2,self._value3,self._value4,
+        self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
+        reals = ft.fn_InverceFourier(complex_data)
+        sound = soundfileUtility()
+        sound.fn_CreateSoundFile(list(reals),int(1 / self.sampleTime))
         
 
 
