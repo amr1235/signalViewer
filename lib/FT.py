@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.fft import fft, ifft
 import struct
 import soundfile as sf
 from playsound import playsound
@@ -21,11 +22,11 @@ class fourierTransform() :
         # fmax = fsample / 2 
         self.maxFrequancy = self.sampling_rate / 2
         #self.frequencies = (np.abs(self.data_fft[:int(self.maxFrequancy)]))
-        self.frequencies = list( np.fft.fftfreq(len(self.data),1/self.sampling_rate) )
+        # self.frequencies = list( np.fft.fftfreq(len(self.data),1/self.sampling_rate) )
         bandWidthOfEachRange = int(self.maxFrequancy / 10)
         self.rangesOfFrequancy = [] # [[0,49],[50,99],...,[]] 10 elements
         self.numberOfSeconds = int(len(self.data_fft) / self.sampling_rate)
-        
+        print(len(self.data_fft))
         start = 0
         end = 0
         for r in range(0,10) : 
@@ -34,6 +35,7 @@ class fourierTransform() :
             self.rangesOfFrequancy.append([start,end])
     # gain function takes 10 gains and it multiply each gain with the corresponding band  
     def gain(self,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10) :
+        numbersOfData = len(self.data_fft)
         for i in range(10) :
             bandWidth = self.rangesOfFrequancy[i]
             start = bandWidth[0]
@@ -42,11 +44,10 @@ class fourierTransform() :
             arr = self.data_fft[start:end + 1]
             # write positive and negative part part
             #print(start,end,self.maxFrequancy)
-            for j in range(start,end + 1) : 
+            for j in range(start,end + 1) :
                 self.dataAfterAmplification[j] = self.data_fft[j] * gain
-                self.dataAfterAmplification[j + int(self.maxFrequancy) - 1 ] = self.data_fft[j + int(self.maxFrequancy) - 1] * gain
+                self.dataAfterAmplification[numbersOfData - 1 - j ] = self.data_fft[numbersOfData - 1 - j] * gain
         return self.dataAfterAmplification
-    
     # get complex-number array and do inverse transform on it
     def fn_InverceFourier(self, complex_arr):
         invrs = np.fft.ifft(complex_arr) #[21.0,0.00000j] so we remove imaginary part

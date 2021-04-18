@@ -21,9 +21,7 @@ import random
 from PyQt5.QtGui import QPixmap
 from lib.tab import newTab
 from lib.FT import soundfileUtility
-
-
-
+from scipy import signal
 
 class clickableLabel(QtWidgets.QLabel) : 
     def __init__(self) : 
@@ -206,9 +204,9 @@ class Ui_SignalViewer(object):
         self.actionChoose_File.triggered.connect(self.selectFolder)
 
         self.colorMode = QtWidgets.QComboBox()
-        self.colorMode.addItem("palette 1")
-        self.colorMode.addItem("palette 2")
-        self.colorMode.addItem("palette 3")
+        self.colorMode.addItem("viridis")
+        self.colorMode.addItem("inferno")
+        self.colorMode.addItem("plasma")
         self.colorMode.addItem("palette 4")
         self.colorMode.addItem("palette 5")
         self.colorMode.currentTextChanged.connect(self.colorModeChanged)
@@ -343,9 +341,11 @@ class Ui_SignalViewer(object):
         currentTab = self.tabwidget.currentWidget()
         fig,(subPlot1,subPlot2,subPlot3) = plt.subplots(3)
         fig.suptitle('Data Analysis')
+        f, t, Sxx = signal.spectrogram(currentTab.editedVoltsData, int(1 / currentTab.sampleTime))
 
         subPlot1.plot(currentTab.timeData, currentTab.originalVoltsData, color="rEd")
-        subPlot2.specgram(currentTab.editedVoltsData,int(1 / currentTab.sampleTime))
+        # subPlot2.specgram(currentTab.editedVoltsData,int(1 / currentTab.sampleTime))
+        subPlot2.pcolormesh(t, f, Sxx, cmap=currentTab.pallete_name)
         subPlot3.plot(currentTab.timeData, currentTab.editedVoltsData, color="magenta")
 
         subPlot1.title.set_text('signal Before Editing')
@@ -400,7 +400,6 @@ class Ui_SignalViewer(object):
             currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
-
 
     def zoom_out_h(self) :
         currentTab = self.tabwidget.currentWidget()
@@ -491,18 +490,27 @@ class Ui_SignalViewer(object):
     def colorModeChanged(self,mode) : 
         currentTab = self.tabwidget.currentWidget()
         currentTab.SpectrogramViewer.clear()
-        if mode == "palette 1" : 
-            currentTab.RGB_Pallete_1 = (0, 182, 188, 255)
-            currentTab.RGB_Pallete_2 = (246, 111, 0, 255)
-            currentTab.RGB_Pallete_3 = (75, 0, 113, 255)
-        elif mode == "palette 2" :
-            currentTab.RGB_Pallete_1 = (108, 79, 60, 255)
-            currentTab.RGB_Pallete_2 = (100, 83, 148, 255)
-            currentTab.RGB_Pallete_3 = (0, 166, 140, 255)
-        elif mode == "palette 3" :
-            currentTab.RGB_Pallete_1 = (191, 216, 51, 255)
-            currentTab.RGB_Pallete_2 = (188, 108, 167, 255)
-            currentTab.RGB_Pallete_3 = (235, 225, 223, 255)
+        if mode == "viridis" :
+            currentTab.pallete_name = "viridis"
+            currentTab.RGB_Pallete_1 = (0.0, (68, 1, 84, 255))
+            currentTab.RGB_Pallete_2 = (0.25, (58, 82, 139, 255))
+            currentTab.RGB_Pallete_3 = (0.5, (32, 144, 140, 255))
+            currentTab.RGB_palette_4 = (0.75, (94, 201, 97, 255))
+            currentTab.RGB_palette_5 = (1.0, (253, 231, 36, 255))
+        elif mode == "inferno" :
+            currentTab.pallete_name = "inferno"
+            currentTab.RGB_Pallete_1 = (1.0, (253, 231, 36, 255))
+            currentTab.RGB_Pallete_2 = (0.25, (87, 15, 109, 255))
+            currentTab.RGB_Pallete_3 = (0.5, (187, 55, 84, 255))
+            currentTab.RGB_palette_4 = (0.75, (249, 142, 8, 255))
+            currentTab.RGB_palette_5 = (1.0, (252, 254, 164, 255))
+        elif mode == "plasma" :
+            currentTab.pallete_name = "plasma"
+            currentTab.RGB_Pallete_1 = (0.0, (12, 7, 134, 255))
+            currentTab.RGB_Pallete_2 = (0.25, (126, 3, 167, 255))
+            currentTab.RGB_Pallete_3 = (0.5, (203, 71, 119, 255))
+            currentTab.RGB_palette_4 = (0.75, (248, 149, 64, 255))
+            currentTab.RGB_palette_5 = (1.0, (239, 248, 33, 255))
 
         elif mode == "palette 4" : 
             currentTab.RGB_Pallete_1 = (219, 178, 209, 255)

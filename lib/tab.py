@@ -6,14 +6,10 @@ import numpy as np
 from lib.FT import fourierTransform,soundfileUtility
 import random
 
-
-
-
 class newTab(QtWidgets.QTabWidget) : 
     def __init__ (self) :
         super(newTab, self).__init__()
         self.numberOfTabs = 0
-    
     def add_new_viewer(self,timeData,voltsData) :
         self.numberOfTabs += 1
         centralwidget = centralWidget(timeData,voltsData)
@@ -61,15 +57,12 @@ class centralWidget(QtWidgets.QWidget) :
         self._value10 = 1
 
         #Pallete of spectrogram *Pallete1 as deafult
-        self.RGB_Pallete_1 = (0, 182, 188, 255)
-        self.RGB_Pallete_2 = (246, 111, 0, 255)
-        self.RGB_Pallete_3 = (75, 0, 113, 255)
-
-        #start plotting the data 
-        self.startPlotting()
-        self.drawSpectrogram()
-        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to] 
-        self.yRangeOfSignal = self.plot.viewRange()[1]
+        self.pallete_name = "viridis"
+        self.RGB_Pallete_1 = (0.0, (68, 1, 84, 255))
+        self.RGB_Pallete_2 = (0.25, (58, 82, 139, 255))
+        self.RGB_Pallete_3 = (0.5, (32, 144, 140, 255))
+        self.RGB_palette_4 = (0.75, (94, 201, 97, 255))
+        self.RGB_palette_5 = (1.0, (253, 231, 36, 255))
 
         #set labels text
         ft = fourierTransform(self.originalVoltsData, int(1 / self.sampleTime))
@@ -85,7 +78,29 @@ class centralWidget(QtWidgets.QWidget) :
         self.label8.setText(_translate("MainWindow", str(ranges[7][0] / 1000 ) + " Khz : \n" + str(ranges[7][1] / 1000 ) + " Khz"))
         self.label9.setText(_translate("MainWindow", str(ranges[8][0] / 1000 ) + " Khz : \n" + str(ranges[8][1] / 1000 ) + " Khz"))
         self.label10.setText(_translate("MainWindow", str(ranges[9][0] / 1000 ) + " Khz : \n" + str(ranges[9][1] / 1000 ) + " Khz"))
-        
+        self.HorizontalLabel1.setText(_translate("MainWindow", "Set Minimun Frequancy"))
+        self.HorizontalLabel2.setText(_translate("MainWindow", "Set Maximum Frequancy"))
+
+        #start plotting the data 
+        self.startPlotting()
+        # values of range of spectrogram
+        self.minFreqOfSpectrogram = 0
+        self.maxFreqOfSpectrogram = ranges[-1][1]
+
+        self.horizontalSlider1.setMinimum(self.minFreqOfSpectrogram)
+        self.horizontalSlider1.setMaximum(self.maxFreqOfSpectrogram)
+        self.horizontalSlider1.setTickInterval(self.maxFreqOfSpectrogram / 10 )
+
+        self.horizontalSlider2.setMinimum(self.minFreqOfSpectrogram)
+        self.horizontalSlider2.setMaximum(self.maxFreqOfSpectrogram)
+        self.horizontalSlider2.setSliderPosition(self.maxFreqOfSpectrogram)
+        self.horizontalSlider2.setTickInterval(self.maxFreqOfSpectrogram / 10)
+
+        self.SpectrogramViewer.clear()
+        self.drawSpectrogram()
+        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to] 
+        self.yRangeOfSignal = self.plot.viewRange()[1]
+ 
     def startPlotting(self) :
         # plot original signal 
         # self.plot = self.OriginalSignalViewer.addPlot()
@@ -116,7 +131,19 @@ class centralWidget(QtWidgets.QWidget) :
         self.plot1.setXRange(self.timeData[self.xPointer],self.timeData[self.plotIndex])
         self.plot1.plot(self.timeData[0:self.plotIndex],self.editedVoltsData[0:self.plotIndex])
     
-    def drawSpectrogram(self) :
+    def minSliderOfSpectrogram(self,value) : 
+        self.minFreqOfSpectrogram = value
+        self.SpectrogramViewer.clear()
+        self.drawSpectrogram()
+    
+    def maxSliderOfSpectrogram(self,value) : 
+        self.maxFreqOfSpectrogram = value
+        self.SpectrogramViewer.clear()
+        self.drawSpectrogram()
+
+    def drawSpectrogram(self,minFreq = 1,maxFreq = 1) :
+        minFreq = self.minFreqOfSpectrogram
+        maxFreq = self.maxFreqOfSpectrogram
         freq = 1 / self.sampleTime
         frequancyArr, timeArr, Sxx = signal.spectrogram(self.editedVoltsData, freq)
         pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
@@ -133,12 +160,12 @@ class centralWidget(QtWidgets.QWidget) :
         hist.gradient.restoreState({
             'mode':
             'rgb',
-            'ticks': [(0.5, self.RGB_Pallete_1), (1.0, self.RGB_Pallete_2),
-                      (0.0, self.RGB_Pallete_3)]
+            'ticks': [self.RGB_Pallete_1, self.RGB_Pallete_2,
+                       self.RGB_Pallete_3,self.RGB_palette_4,self.RGB_palette_5]
         })
         img.setImage(Sxx)
         img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
-        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=0, yMax=frequancyArr[-1])
+        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=minFreq, yMax=maxFreq)
         p1.setLabel('bottom', "Time", units='s')
         p1.setLabel('left', "Frequency", units='Hz')
 
@@ -169,11 +196,43 @@ class centralWidget(QtWidgets.QWidget) :
         self.SpectrogramGroupBox.setObjectName("SpectrogramGroupBox")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.SpectrogramGroupBox)
         self.gridLayout_2.setObjectName("gridLayout_2")
+
+        self.horizontalSlider2 = QtWidgets.QSlider(self.SpectrogramGroupBox)
+        font = QtGui.QFont()
+        font.setPointSize(7)
+        self.horizontalSlider2.setFont(font)
+        self.horizontalSlider2.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
+        self.horizontalSlider2.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider2.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.horizontalSlider2.setTickInterval(1)
+        self.horizontalSlider2.setObjectName("horizontalSlider2")
+        self.gridLayout_2.addWidget(self.horizontalSlider2, 3, 0, 1, 1)
+
         self.SpectrogramViewer = GraphicsLayoutWidget(self.SpectrogramGroupBox)
         self.SpectrogramViewer.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.SpectrogramViewer.setStyleSheet("background-color:rgb(0,0,0)")
         self.SpectrogramViewer.setObjectName("SpectrogramViewer")
         self.gridLayout_2.addWidget(self.SpectrogramViewer, 0, 0, 1, 1)
+
+        self.horizontalSlider1 = QtWidgets.QSlider(self.SpectrogramGroupBox)
+        self.horizontalSlider1.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
+        self.horizontalSlider1.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider1.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.horizontalSlider1.setTickInterval(1)
+        self.horizontalSlider1.setObjectName("horizontalSlider1")
+        self.gridLayout_2.addWidget(self.horizontalSlider1, 1, 0, 1, 1)
+        self.HorizontalLabel1 = QtWidgets.QLabel(self.SpectrogramGroupBox)
+        font = QtGui.QFont()
+        font.setPointSize(7)
+        self.HorizontalLabel1.setFont(font)
+        self.HorizontalLabel1.setAlignment(QtCore.Qt.AlignCenter)
+        self.HorizontalLabel1.setObjectName("HorizontalLabel1")
+        self.gridLayout_2.addWidget(self.HorizontalLabel1, 2, 0, 1, 1)
+        self.HorizontalLabel2 = QtWidgets.QLabel(self.SpectrogramGroupBox)
+        self.HorizontalLabel2.setAlignment(QtCore.Qt.AlignCenter)
+        self.HorizontalLabel2.setObjectName("HorizontalLabel2")
+        self.gridLayout_2.addWidget(self.HorizontalLabel2, 4, 0, 1, 1)
+
         self.gridLayout_4.addWidget(self.SpectrogramGroupBox, 0, 1, 3, 1)
         self.OriginalSignalGroupbox = QtWidgets.QGroupBox(self)
         font = QtGui.QFont()
@@ -417,6 +476,9 @@ class centralWidget(QtWidgets.QWidget) :
         self.Slider9.valueChanged[int].connect(self.fn_slider9Value)
         self.Slider10.valueChanged[int].connect(self.fn_slider10Value)
 
+        self.horizontalSlider1.valueChanged[int].connect(self.minSliderOfSpectrogram)
+        self.horizontalSlider2.valueChanged[int].connect(self.maxSliderOfSpectrogram)
+
         QtCore.QMetaObject.connectSlotsByName(self)
         self.setTabOrder(self.Slider2, self.Slider3)
         self.setTabOrder(self.Slider3, self.Slider4)
@@ -430,7 +492,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.setTabOrder(self.OriginalSignalViewer, self.EditedSignalViewer)
         self.setTabOrder(self.EditedSignalViewer, self.SpectrogramViewer)
 
-    
     def fn_slider1Value(self, value1=1):
         self._value1 = value1
         self.process()
