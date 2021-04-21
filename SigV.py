@@ -19,19 +19,22 @@ from scipy import signal
 import matplotlib.pyplot as plt
 import random
 from PyQt5.QtGui import QPixmap
-from lib.tab import newTab
+from lib.tab import Tabs
 from lib.FT import soundfileUtility
 from scipy import signal
 
-class clickableLabel(QtWidgets.QLabel) : 
-    def __init__(self) : 
-        super().__init__()
-        self.clickMethod = None
-        
-    
-    def mousePressEvent(self, ev):
-        if ev.buttons() == QtCore.Qt.LeftButton :
-            self.clickMethod()
+class newAction(QtWidgets.QAction):
+    def __init__(self,parent,iconPath,objectName,keySequance="",method_to_trigger=None):
+        super(newAction,self).__init__()
+        self.setParent(parent)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setIcon(icon)
+        self.setObjectName(objectName)
+        shortCut = QtWidgets.QShortcut(QtGui.QKeySequence(keySequance),parent)
+        if method_to_trigger != None : 
+            shortCut.activated.connect(method_to_trigger)
+            self.triggered.connect(method_to_trigger)
 
 class mainWindow(QtWidgets.QMainWindow) : 
     def __init__(self,parent = None) : 
@@ -66,10 +69,10 @@ class Ui_SignalViewer(object):
         SignalViewer.setObjectName("SignalViewer")
         SignalViewer.resize(1350, 690)
         SignalViewer.setTabShape(QtWidgets.QTabWidget.Triangular)
-        SignalViewer.KeyUpMethod = self.key_up
-        SignalViewer.KeyDownMethod = self.key_down    
-        SignalViewer.KeyLeftMethod = self.key_left
-        SignalViewer.KeyRightMethod = self.key_right
+        SignalViewer.KeyUpMethod = self.scroll_up
+        SignalViewer.KeyDownMethod = self.scroll_down    
+        SignalViewer.KeyLeftMethod = self.scroll_left
+        SignalViewer.KeyRightMethod = self.scroll_right
         SignalViewer.spaceMethod = self.spaceClicked
         SignalViewer.windowResizeMethod = self.windowResize
         
@@ -78,165 +81,63 @@ class Ui_SignalViewer(object):
         SignalViewer.setCentralWidget(self.centralwidget)
         
 
-        self.menubar = QtWidgets.QMenuBar(SignalViewer)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 802, 27))
-        self.menubar.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
-        self.menubar.setAutoFillBackground(True)
-        self.menubar.setStyleSheet("")
-        self.menubar.setDefaultUp(False)
-        self.menubar.setObjectName("menubar")
-        self.menuFile = QtWidgets.QMenu(self.menubar)
-        self.menuFile.setToolTipsVisible(False)
-        self.menuFile.setObjectName("menuFile")
-        self.menuEdit = QtWidgets.QMenu(self.menubar)
-        SignalViewer.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(SignalViewer)
         self.statusbar.setObjectName("statusbar")
         SignalViewer.setStatusBar(self.statusbar)
+
+        # tool bar
         self.toolBar = QtWidgets.QToolBar(SignalViewer)
-        self.toolBar.setEnabled(True)
-        self.toolBar.setMouseTracking(True)
-        self.toolBar.setMovable(False)
         self.toolBar.setObjectName("toolBar")
-        SignalViewer.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolBar)
-        self.toolBar_2 = QtWidgets.QToolBar(SignalViewer)
-        self.toolBar_2.setObjectName("toolBar_2")
-        SignalViewer.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_2)
+        SignalViewer.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+
         # open file
-        self.actionnew_file = QtWidgets.QAction(SignalViewer)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons/folder.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionnew_file.setIcon(icon)
-        self.actionnew_file.setObjectName("actionnew_file")
-        self.actionnew_file.triggered.connect(self.selectFolder)
-
+        self.actionnew_file = newAction(SignalViewer, "icons/folder.png", "actionnew_file",method_to_trigger=self.selectFolder)
         # zoom in H
-        self.actionzoom_in_h = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/ic_zoom_in_h_black_24dp.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionzoom_in_h.setIcon(icon1)
-        self.actionzoom_in_h.setObjectName("actionzoom_in_h")
-        self.actionzoom_in_h.triggered.connect(self.zoom_in_h)
-        self.shortcutZoom_in_h = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+H"),SignalViewer)
-        self.shortcutZoom_in_h.activated.connect(self.zoom_in_h)
-        self.actionzoom_in_h.setEnabled(False)
+        self.actionzoom_in_h = newAction(SignalViewer, "icons/ic_zoom_in_h_black_24dp.png", "actionzoom_in_h",method_to_trigger=self.zoom_in_h,keySequance="Ctrl+H")
         # zoom out H 
-        self.actionzoom_out_h = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/ic_zoom_out_h_black_24dp.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionzoom_out_h.setIcon(icon1)
-        self.actionzoom_out_h.setObjectName("actionzoom_out_h")
-        self.actionzoom_out_h.triggered.connect(self.zoom_out_h)
-        self.shortcutZoom_out_h = QtWidgets.QShortcut(QtGui.QKeySequence("Shift+H"),SignalViewer)
-        self.shortcutZoom_out_h.activated.connect(self.zoom_out_h)
-        self.actionzoom_out_h.setEnabled(False)
+        self.actionzoom_out_h = newAction(SignalViewer, "icons/ic_zoom_out_h_black_24dp.png", "actionzoom_out_h",method_to_trigger=self.zoom_out_h,keySequance="Shift+H")
         # zoom in v 
-        self.actionzoom_in_v = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/ic_zoom_in_v_black_24dp.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionzoom_in_v.setIcon(icon1)
-        self.actionzoom_in_v.setObjectName("actionzoom_in_v")
-        self.actionzoom_in_v.triggered.connect(self.zoom_in_v)
-        self.shortcutZoom_in_v = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+V"),SignalViewer)
-        self.shortcutZoom_in_v.activated.connect(self.zoom_in_v)
-        self.actionzoom_in_v.setEnabled(False)
+        self.actionzoom_in_v = newAction(SignalViewer, "icons/ic_zoom_in_v_black_24dp.png", "actionzoom_in_v",method_to_trigger=self.zoom_in_v,keySequance="Ctrl+V")
         # zoom out v 
-        self.actionzoom_out_v = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/ic_zoom_out_v_black_24dp.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionzoom_out_v.setIcon(icon1)
-        self.actionzoom_out_v.setObjectName("actionzoom_out_v")
-        self.actionzoom_out_v.triggered.connect(self.zoom_out_v)
-        self.shortcutZoom_out_v = QtWidgets.QShortcut(QtGui.QKeySequence("Shift+V"),SignalViewer)
-        self.shortcutZoom_out_v.activated.connect(self.zoom_out_v)
-        self.actionzoom_out_v.setEnabled(False)
-
+        self.actionzoom_out_v = newAction(SignalViewer, "icons/ic_zoom_out_v_black_24dp.png", "actionzoom_out_v",method_to_trigger=self.zoom_out_v,keySequance="Shift+V")
         #pause 
-        self.actionPause = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionPause.setIcon(icon1)
-        self.actionPause.setObjectName("actionPause")
-        self.actionPause.triggered.connect(self.pause)
-        self.actionPause.setEnabled(False)
-
+        self.actionPause = newAction(SignalViewer, "icons/pause.png", "actionPause",method_to_trigger=self.pause)
         #resume
-        self.actionResume = QtWidgets.QAction(SignalViewer)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/start.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionResume.setIcon(icon1)
-        self.actionResume.setObjectName("actionPause")
-        self.actionResume.triggered.connect(self.resume)
-        self.actionResume.setEnabled(False)
+        self.actionResume = newAction(SignalViewer, "icons/start.png", "actionResume",method_to_trigger=self.resume)
         #save file
-        self.actionsave_file = QtWidgets.QAction(SignalViewer)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("icons/diskette.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionsave_file.setIcon(icon3)
-        self.actionsave_file.setObjectName("actionsave_file")
-        self.actionsave_file.triggered.connect(self.generateReport)
-        self.actionsave_file.setEnabled(False)
-        # clear 
-        self.actionClear = QtWidgets.QAction(SignalViewer)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("icons/delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionClear.setIcon(icon3)
-        self.actionClear.setObjectName("actionClear")
-        self.actionClear.triggered.connect(self.clearSignal)
-        self.actionClear.setEnabled(False)
+        self.actionsave_file = newAction(SignalViewer, "icons/diskette.png", "actionsave_fil",method_to_trigger=self.generateReport)
+        # clear
+        self.actionClear = newAction(SignalViewer, "icons/delete.png", "actionClear",method_to_trigger=self.clearSignal)
 
         # change color of spectrogram
         self.labelForComboBox = QtWidgets.QLabel("spectroGram : ")
-        self.actionClear.setEnabled(False)
 
-        # playSound action 
-        self.playSound = QtWidgets.QAction(SignalViewer)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("icons/play.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.playSound.setIcon(icon3)
-        self.playSound.setObjectName("playSound")
-        self.playSound.triggered.connect(self.playSoundFile)
-        self.playSound.setEnabled(False)
+        # playSound action
+        self.playSound = newAction(SignalViewer, "icons/play.png", "playSound",method_to_trigger=self.playSoundFile)
 
-        # select Folder
-        self.actionChoose_File = QtWidgets.QAction(SignalViewer)
-        self.actionChoose_File.setObjectName("actionChoose_File")
-        self.actionChoose_File.triggered.connect(self.selectFolder)
-
+        #colors combo box
+        spectrogramsModes = ["viridis","inferno","plasma","palette 4","palette 5"]
         self.colorMode = QtWidgets.QComboBox()
-        self.colorMode.addItem("viridis")
-        self.colorMode.addItem("inferno")
-        self.colorMode.addItem("plasma")
-        self.colorMode.addItem("palette 4")
-        self.colorMode.addItem("palette 5")
+        for mode in spectrogramsModes :
+            self.colorMode.addItem(mode)
         self.colorMode.currentTextChanged.connect(self.colorModeChanged)
-        self.colorMode.setEnabled(False)
 
-        self.menuFile.addAction(self.actionChoose_File)
-        self.menubar.addAction(self.menuFile.menuAction())
-        self.toolBar_2.addSeparator()
-        self.toolBar_2.addAction(self.actionnew_file)
-        self.toolBar_2.addAction(self.actionsave_file)
-        self.toolBar_2.addAction(self.actionzoom_in_h)
-        self.toolBar_2.addAction(self.actionzoom_out_h)
-        self.toolBar_2.addAction(self.actionzoom_in_v)
-        self.toolBar_2.addAction(self.actionzoom_out_v)
-        self.toolBar_2.addAction(self.actionPause)
-        self.toolBar_2.addAction(self.actionResume)
-        self.toolBar_2.addAction(self.actionClear)
-        self.toolBar_2.addSeparator()
-        self.toolBar_2.addAction(self.playSound)
-        self.toolBar_2.addWidget(self.labelForComboBox)
-        self.toolBar_2.addWidget(self.colorMode)
-
-
+        # add actions to toolBar
+        self.toolbarActions = [self.actionnew_file,self.actionsave_file,self.actionzoom_in_h,self.actionzoom_out_h
+                            ,  self.actionzoom_in_v,self.actionzoom_out_v,self.actionPause,self.actionClear,self.playSound] # order is important 
+        self.toolBar.addSeparator()
+        for action in self.toolbarActions : 
+            self.toolBar.addAction(action)
+        self.toolBar.addSeparator()
+        self.toolBar.addWidget(self.labelForComboBox)
+        self.toolBar.addWidget(self.colorMode)
+        #disable action
+        self.disableWidgets()
         # tab widget 
-        self.tabwidget = newTab()
+        self.tabwidget = Tabs()
         self.tabwidget.setParent(self.centralwidget)
-        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height())
         self.tabwidget.show()
-
-        
 
         self.retranslateUi(SignalViewer)
         QtCore.QMetaObject.connectSlotsByName(SignalViewer)
@@ -244,9 +145,7 @@ class Ui_SignalViewer(object):
     def retranslateUi(self, SignalViewer):
         _translate = QtCore.QCoreApplication.translate
         SignalViewer.setWindowTitle(_translate("SignalViewer", "Signal Viewer"))
-        self.menuFile.setTitle(_translate("SignalViewer", "File"))
         self.toolBar.setWindowTitle(_translate("SignalViewer", "toolBar"))
-        self.toolBar_2.setWindowTitle(_translate("SignalViewer", "toolBar_2"))
         self.actionnew_file.setText(_translate("SignalViewer", "newfile"))
         self.actionnew_file.setShortcut(_translate("SignalViewer","Ctrl+N"))
         self.actionzoom_in_h.setText(_translate("SignalViewer", "zoom in horizontally"))
@@ -261,40 +160,27 @@ class Ui_SignalViewer(object):
         self.actionResume.setText(_translate("SignalViewer", "Resume"))
         self.actionsave_file.setText(_translate("SignalViewer", "save file"))
         self.actionsave_file.setShortcut(_translate("SignalViewer", "Ctrl+S"))
-        self.actionChoose_File.setText(_translate("SignalViewer", "Choose File"))
         self.actionClear.setText(_translate("SignalViewer", "Clear a Signal"))
         self.actionClear.setShortcut(_translate("SignalViewer", "Ctrl+D"))
     
     def windowResize(self,event) : 
-        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 80)
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height())
     
     def playSoundFile(self) :
         currentTab = self.tabwidget.currentWidget()
         currentTab.playSound()
 
     def enableWidgets(self) : 
-        self.actionPause.setEnabled(True)
-        self.actionResume.setEnabled(True)
-        self.actionzoom_in_h.setEnabled(True)
-        self.actionzoom_in_v.setEnabled(True)
-        self.actionzoom_out_h.setEnabled(True)
-        self.actionzoom_out_v.setEnabled(True)
-        self.actionsave_file.setEnabled(True)
-        self.actionClear.setEnabled(True)
+        for action in self.toolbarActions : 
+            action.setEnabled(True)
         self.colorMode.setEnabled(True)
-        self.playSound.setEnabled(True)
     
     def disableWidgets(self) :
-        self.actionPause.setEnabled(False)
-        self.actionResume.setEnabled(False)
-        self.actionzoom_in_h.setEnabled(False)
-        self.actionzoom_in_v.setEnabled(False)
-        self.actionzoom_out_h.setEnabled(False)
-        self.actionzoom_out_v.setEnabled(False)
-        self.actionsave_file.setEnabled(False)
-        self.actionClear.setEnabled(False)
+        for action in self.toolbarActions : 
+            if action == self.actionnew_file : 
+                continue
+            action.setEnabled(False)
         self.colorMode.setEnabled(False)
-        self.playSound.setEnabled(False)
 
     def spaceClicked(self,ev) :
         if self.isPaused : 
@@ -433,7 +319,7 @@ class Ui_SignalViewer(object):
                 currentTab.plot1.setYRange(rangeOfY[0],rangeOfY[1])
                 currentTab.yRangeOfSignal = [rangeOfY[0],rangeOfY[1]]
     
-    def scroll_up(self) :
+    def scroll_up(self,ev) :
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False :
             rangOfY = currentTab.yRangeOfSignal
@@ -443,7 +329,7 @@ class Ui_SignalViewer(object):
             currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
             currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
     
-    def scroll_down(self) : 
+    def scroll_down(self,ev) : 
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False :
             rangOfY = currentTab.yRangeOfSignal
@@ -453,7 +339,7 @@ class Ui_SignalViewer(object):
             currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
             currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
 
-    def scroll_left(self) :
+    def scroll_left(self,ev) :
         currentTab = self.tabwidget.currentWidget()
         if currentTab.timer.isActive() == False :
             rangeOfX = currentTab.xRangeOfSignal
@@ -474,18 +360,6 @@ class Ui_SignalViewer(object):
             currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
             currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
-
-    def key_up(self,ev) : 
-        self.scroll_up()
-
-    def key_down(self,ev) : 
-        self.scroll_down()
-
-    def key_left(self,ev) : 
-        self.scroll_left()
-        
-    def key_right(self,ev):
-        self.scroll_right()	
 
     def colorModeChanged(self,mode) : 
         currentTab = self.tabwidget.currentWidget()

@@ -16,19 +16,13 @@ class fourierTransform() :
         self.data = data 
         self.sampling_rate = sampling_rate
         self.data_fft = np.fft.fft(self.data)
-        #filtering data 
-        # for i in range(int(self.sampling_rate),len(self.data_fft)) : 
-        #     self.data_fft[i] = self.data_fft[i] * 0
         self.dataAfterAmplification = list(self.data_fft).copy()
         # we will devide the range of freq into 10 ranges 
         # fmax = fsample / 2 
         self.maxFrequancy = self.sampling_rate / 2
-        #self.frequencies = (np.abs(self.data_fft[:int(self.maxFrequancy)]))
-        # self.frequencies = list( np.fft.fftfreq(len(self.data),1/self.sampling_rate) )
         bandWidthOfEachRange = int(self.maxFrequancy / 10)
         self.rangesOfFrequancy = [] # [[0,49],[50,99],...,[]] 10 elements
         self.numberOfSeconds = int(len(self.data_fft) / self.sampling_rate)
-        print(len(self.data_fft))
         start = 0
         end = 0
         for r in range(0,10) : 
