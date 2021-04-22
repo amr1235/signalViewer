@@ -29,8 +29,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.timeData = timeData
         self.originalVoltsData = voltsData
         self.editedVoltsData   = voltsData
-        self.plotIndex = 200
-        self.xPointer  = 0
         self.plot = None # original Plot
         self.plot1 = None # plot After Editing
 
@@ -42,25 +40,23 @@ class centralWidget(QtWidgets.QWidget) :
         self.scrollStep_x = 100 * self.sampleTime
         self.scrollStep_y = yrange / 10
         
-        self.timer = QtCore.QTimer()
         
         # sliders values 
         for i in range(1,11) : 
             setattr(self, "_value"+str(i), 1) # self._value[1-10] = 1
 
         #Pallete of spectrogram *viridis as deafult
-        self.pallete_name = "viridis"
-        self.RGB_Pallete_1 = (0.0, (68, 1, 84, 255))
-        self.RGB_Pallete_2 = (0.25, (58, 82, 139, 255))
-        self.RGB_Pallete_3 = (0.5, (32, 144, 140, 255))
-        self.RGB_palette_4 = (0.75, (94, 201, 97, 255))
-        self.RGB_palette_5 = (1.0, (253, 231, 36, 255))
+        self.RGB_Pallete_1 = (0, 182, 188, 255)
+        self.RGB_Pallete_2 = (246, 111, 0, 255)
+        self.RGB_Pallete_3 = (75, 0, 113, 255)
 
         #set labels text
         ft = fourierTransform(self.originalVoltsData, int(1 / self.sampleTime))
         ranges = ft.rangesOfFrequancy
+
         for i in range(10) : 
             getattr(getattr(self,"label"+str(i+1)),"setText")(str(ranges[i][0] / 1000 ) + " Khz : \n" + str(ranges[i][1] / 1000 ) + " Khz")
+
         self.HorizontalLabel1.setText("Set Minimun Frequancy")
         self.HorizontalLabel2.setText("Set Maximum Frequancy")
 
@@ -81,7 +77,7 @@ class centralWidget(QtWidgets.QWidget) :
 
         self.SpectrogramViewer.clear()
         self.drawSpectrogram()
-        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to] 
+        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to]
         self.yRangeOfSignal = self.plot.viewRange()[1]
  
     def startPlotting(self) :
@@ -121,8 +117,8 @@ class centralWidget(QtWidgets.QWidget) :
         hist.gradient.restoreState({
             'mode':
             'rgb',
-            'ticks': [self.RGB_Pallete_1, self.RGB_Pallete_2,
-                       self.RGB_Pallete_3,self.RGB_palette_4,self.RGB_palette_5]
+            'ticks': [(0.5, self.RGB_Pallete_1), (1.0, self.RGB_Pallete_2),
+                      (0.0, self.RGB_Pallete_3)]
         })
         img.setImage(Sxx)
         img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
@@ -348,7 +344,7 @@ class centralWidget(QtWidgets.QWidget) :
         self.drawSpectrogram()
     
     def playSound(self) : 
-        ft = fourierTransform(list(self.originalVoltsData).copy(), 1 / self.sampleTime)
+        ft = fourierTransform(list(self.editedVoltsData).copy(), 1 / self.sampleTime)
         complex_data = ft.gain(self._value1,self._value2,self._value3,self._value4,
         self._value5,self._value6,self._value7,self._value8,self._value9,self._value10)
         reals = ft.fn_InverceFourier(complex_data)

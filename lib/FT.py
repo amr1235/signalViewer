@@ -12,17 +12,14 @@ import os
 
 class fourierTransform() : 
     def __init__(self,data,sampling_rate) :
-        
         self.data = data 
         self.sampling_rate = sampling_rate
-        self.data_fft = np.fft.fft(self.data)
-        self.dataAfterAmplification = list(self.data_fft).copy()
+        self.data_fft = np.fft.fft(self.data) # 20 30 40 fmax = 50hz 
         # we will devide the range of freq into 10 ranges 
         # fmax = fsample / 2 
         self.maxFrequancy = self.sampling_rate / 2
         bandWidthOfEachRange = int(self.maxFrequancy / 10)
         self.rangesOfFrequancy = [] # [[0,49],[50,99],...,[]] 10 elements
-        self.numberOfSeconds = int(len(self.data_fft) / self.sampling_rate)
         start = 0
         end = 0
         for r in range(0,10) : 
@@ -37,18 +34,24 @@ class fourierTransform() :
             start = bandWidth[0]
             end = bandWidth[1]
             gain = locals()['g' + str(i + 1)]
-            arr = self.data_fft[start:end + 1]
             # write positive and negative part part
             #print(start,end,self.maxFrequancy)
             for j in range(start,end + 1) :
-                self.dataAfterAmplification[j] = self.data_fft[j] * gain
-                self.dataAfterAmplification[numbersOfData - 1 - j ] = self.data_fft[numbersOfData - 1 - j] * gain
-        return self.dataAfterAmplification
+                self.data_fft[j] = self.data_fft[j] * gain
+                self.data_fft[numbersOfData - 1 - j ] = self.data_fft[numbersOfData - 1 - j] * gain
+        return self.data_fft
     # get complex-number array and do inverse transform on it
     def fn_InverceFourier(self, complex_arr):
         invrs = np.fft.ifft(complex_arr) #[21.0,0.00000j] so we remove imaginary part
-        self.real_data = list(invrs.real) #sound file data
-        return self.real_data
+        real_data = list(invrs.real) #sound file data
+        return real_data
+    
+    def deleteRangeOfFrequancy(self,min,max) : 
+        numbersOfData = len(self.data_fft)
+        for j in range(min,max + 1) :
+                self.data_fft[j] = self.data_fft[j] * 0.0
+                self.data_fft[numbersOfData - 1 - j ] = self.data_fft[numbersOfData - 1 - j] * 0.0
+        return self.data_fft
 
 # offers utility need in sound file package
 class soundfileUtility():
