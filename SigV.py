@@ -136,7 +136,8 @@ class Ui_SignalViewer(object):
         # tab widget 
         self.tabwidget = Tabs()
         self.tabwidget.setParent(self.centralwidget)
-        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height())
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 100)
+        # self.tabwidget.setMaximumHeight(SignalViewer.height() - 100)
         self.tabwidget.show()
 
         self.retranslateUi(SignalViewer)
@@ -164,7 +165,7 @@ class Ui_SignalViewer(object):
         self.actionClear.setShortcut(_translate("SignalViewer", "Ctrl+D"))
     
     def windowResize(self,event) : 
-        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height())
+        self.tabwidget.resize(SignalViewer.width(), SignalViewer.height() - 100)
     
     def playSoundFile(self) :
         currentTab = self.tabwidget.currentWidget()
@@ -277,8 +278,8 @@ class Ui_SignalViewer(object):
         rangeOfX    = currentTab.xRangeOfSignal
         rangeOfX[0] =  rangeOfX[0] * 0.8
         rangeOfX[1] =  rangeOfX[1] * 0.8
-        currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
-        currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+        currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1],0)
+        currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1],0)
         currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
 
     def zoom_out_h(self) :
@@ -286,8 +287,8 @@ class Ui_SignalViewer(object):
         xRangeStack = currentTab.xRangeStack
         if len(xRangeStack) != 0 :
             rangeOfX = xRangeStack.pop()
-            currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
-            currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+            currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1],0)
+            currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1],0)
             currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
     
     def zoom_in_v(self) : 
@@ -312,41 +313,41 @@ class Ui_SignalViewer(object):
     
     def scroll_up(self,ev) :
         currentTab = self.tabwidget.currentWidget()
-        rangOfY = currentTab.yRangeOfSignal
-        rangOfY[0] += currentTab.scrollStep_y
-        rangOfY[1] += currentTab.scrollStep_y
-        currentTab.plot.setYRange(rangOfY[0],rangOfY[1])
-        currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
-        currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
+        self.scroll_y(currentTab.scrollStep_y)
     
     def scroll_down(self,ev) : 
         currentTab = self.tabwidget.currentWidget()
-        rangOfY = currentTab.yRangeOfSignal
-        rangOfY[0] -= currentTab.scrollStep_y
-        rangOfY[1] -= currentTab.scrollStep_y
-        currentTab.plot.setYRange(rangOfY[0],rangOfY[1])
-        currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
-        currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
+        self.scroll_y(-1 * currentTab.scrollStep_y)
 
     def scroll_left(self,ev) :
         currentTab = self.tabwidget.currentWidget()
-        rangeOfX = currentTab.xRangeOfSignal
-        if rangeOfX[0] <= 0 : 
-            return
-        rangeOfX[0] -= currentTab.scrollStep_x
-        rangeOfX[1] -= currentTab.scrollStep_x
-        currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
-        currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
-        currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
+        self.scroll_x(-1 * currentTab.scrollStep_x)
 
     def scroll_right(self,ev) :
         currentTab = self.tabwidget.currentWidget()
+        self.scroll_x(currentTab.scrollStep_x)
+
+    def scroll_x(self,step) : 
+        currentTab = self.tabwidget.currentWidget()
         rangeOfX = currentTab.xRangeOfSignal
-        rangeOfX[0] += currentTab.scrollStep_x
-        rangeOfX[1] += currentTab.scrollStep_x
-        currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1])
-        currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1])
+        if rangeOfX[0] <= currentTab.timeData[0] :
+            return
+        if rangeOfX[1] >= list(currentTab.timeData)[len(currentTab.timeData) - 5 ] : 
+            return
+        rangeOfX[0] += step
+        rangeOfX[1] += step
+        currentTab.plot.setXRange(rangeOfX[0],rangeOfX[1],0)
+        currentTab.plot1.setXRange(rangeOfX[0],rangeOfX[1],0)
         currentTab.xRangeOfSignal = [rangeOfX[0],rangeOfX[1]]
+
+    def scroll_y(self,step) : 
+        currentTab = self.tabwidget.currentWidget()
+        rangOfY = currentTab.yRangeOfSignal
+        rangOfY[0] += step
+        rangOfY[1] += step
+        currentTab.plot.setYRange(rangOfY[0],rangOfY[1])
+        currentTab.plot1.setYRange(rangOfY[0],rangOfY[1])
+        currentTab.yRangeOfSignal = [rangOfY[0],rangOfY[1]]
 
     def colorModeChanged(self,mode) : 
         currentTab = self.tabwidget.currentWidget()

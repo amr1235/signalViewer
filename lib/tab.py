@@ -5,6 +5,21 @@ import pyqtgraph
 import numpy as np
 from lib.FT import fourierTransform,soundfileUtility
 import random
+import re
+
+class Slider(QtWidgets.QSlider) : 
+    def __init__(self,objectName,parent) : 
+        super(Slider,self).__init__()
+        self.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
+        self.setMinimum(0)
+        self.setMaximum(5)
+        self.setSliderPosition(1)
+        self.setOrientation(QtCore.Qt.Vertical)
+        self.setTickPosition(QtWidgets.QSlider.TicksAbove)
+        self.setTickInterval(1)
+        self.setObjectName(objectName)
+        self.setParent(parent)
+
 
 class Tabs(QtWidgets.QTabWidget) : 
     def __init__ (self) :
@@ -60,8 +75,6 @@ class centralWidget(QtWidgets.QWidget) :
         self.HorizontalLabel1.setText("Set Minimun Frequancy")
         self.HorizontalLabel2.setText("Set Maximum Frequancy")
 
-        #start plotting the data 
-        self.startPlotting()
         # values of range of spectrogram
         self.minFreqOfSpectrogram = 0
         self.maxFreqOfSpectrogram = ranges[-1][1]
@@ -77,9 +90,16 @@ class centralWidget(QtWidgets.QWidget) :
 
         self.SpectrogramViewer.clear()
         self.drawSpectrogram()
-        self.xRangeOfSignal = self.plot.viewRange()[0] # [from , to]
+
+        self.xRangeOfSignal = None # [from , to]
+        self.yRangeOfSignal = None
+
+        #start plotting the data 
+        self.startPlotting()
+        # get range of view of the plots
+        self.xRangeOfSignal = [0.0,list(self.timeData)[-1]] # [from , to]
         self.yRangeOfSignal = self.plot.viewRange()[1]
- 
+
     def startPlotting(self) :
         # plot original signal 
         self.plot = self.OriginalSignalViewer.addPlot()
@@ -87,6 +107,10 @@ class centralWidget(QtWidgets.QWidget) :
         # plot data After Editing
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.plot(self.timeData,self.editedVoltsData)
+        # range edit
+        self.plot.setXRange(0.0,list(self.timeData)[-1],0)
+        self.plot1.setXRange(0.0,list(self.timeData)[-1],0)
+
     
     def minSliderOfSpectrogram(self,value) : 
         self.minFreqOfSpectrogram = value
@@ -99,10 +123,14 @@ class centralWidget(QtWidgets.QWidget) :
         self.drawSpectrogram()
 
     def drawSpectrogram(self,minFreq = 1,maxFreq = 1) :
-        minFreq = self.minFreqOfSpectrogram
-        maxFreq = self.maxFreqOfSpectrogram
+        minFreq_Slider = self.minFreqOfSpectrogram
+        maxFreq_Slider = self.maxFreqOfSpectrogram
         freq = 1 / self.sampleTime
-        frequancyArr, timeArr, Sxx = signal.spectrogram(self.editedVoltsData, freq)
+        ft = fourierTransform(self.editedVoltsData,int(freq))
+        ft.deleteRangeOfFrequancy(0,minFreq_Slider)
+        ft.deleteRangeOfFrequancy(maxFreq_Slider,int(freq/2))
+        realsAfterEdit = ft.fn_InverceFourier(ft.data_fft)
+        frequancyArr, timeArr, Sxx = signal.spectrogram(np.array(realsAfterEdit), freq)
         pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
 
         win = self.SpectrogramViewer
@@ -122,7 +150,7 @@ class centralWidget(QtWidgets.QWidget) :
         })
         img.setImage(Sxx)
         img.scale(timeArr[-1] / np.size(Sxx, axis=1), frequancyArr[-1] / np.size(Sxx, axis=0))
-        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=minFreq, yMax=maxFreq)
+        p1.setLimits(xMin=0, xMax=timeArr[-1], yMin=0, yMax=frequancyArr[-1])
         p1.setLabel('bottom', "Time", units='s')
         p1.setLabel('left', "Frequency", units='Hz')
 
@@ -250,81 +278,24 @@ class centralWidget(QtWidgets.QWidget) :
         self.gridLayout.addLayout(self.gridLayout_7, 1, 0, 1, 10)
 
         # add 10 sliders to gui 
-        for i in range(10) : 
-            setattr(self, "Slider"+str(i+1), QtWidgets.QSlider(self.SignalEditorGroupBox))
-            Slider = getattr(self, "Slider" + str(i + 1))
-            Slider.setCursor(QtGui.QCursor(QtCore.Qt.ClosedHandCursor))
-            Slider.setMinimum(0)
-            Slider.setMaximum(5)
-            Slider.setSliderPosition(1)
-            Slider.setOrientation(QtCore.Qt.Vertical)
-            Slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
-            Slider.setTickInterval(1)
-            Slider.setObjectName("Slider" + str(i + 1))
-            getattr(getattr(self,"gridLayout"), "addWidget")(Slider, 0, i, 1, 1)
+        for i in range(10) :
+            setattr(self, "slider"+str(i+1), Slider(parent=self.SignalEditorGroupBox,objectName="Slider"+str(i+1)))
+            Slid = getattr(self, "slider" + str(i + 1))
+            getattr(getattr(self,"gridLayout"), "addWidget")(Slid, 0, i, 1, 1)
+            # link slider to the trigger function
+            Slid.valueChanged.connect(lambda v : self.fn_sliderValue(v))
 
         self.gridLayout_4.addWidget(self.SignalEditorGroupBox, 1, 0, 1, 1)
         self.gridLayout_6.addLayout(self.gridLayout_4, 0, 0, 1, 1)
-        ###########################################################################
-        # Linkage is here
-        ###########################################################################
-        for i in range(1,11) : 
-            getattr(getattr(getattr(self,"Slider" + str(i)),"valueChanged")[int], "connect")(getattr(self, "fn_slider"+str(i)+"Value"))
 
         self.horizontalSlider1.valueChanged[int].connect(self.minSliderOfSpectrogram)
         self.horizontalSlider2.valueChanged[int].connect(self.maxSliderOfSpectrogram)
-
         QtCore.QMetaObject.connectSlotsByName(self)
-        # self.setTabOrder(self.Slider2, self.Slider3)
-        # self.setTabOrder(self.Slider3, self.Slider4)
-        # self.setTabOrder(self.Slider4, self.Slider5)
-        # self.setTabOrder(self.Slider5, self.Slider6)
-        # self.setTabOrder(self.Slider6, self.Slider7)
-        # self.setTabOrder(self.Slider7, self.Slider8)
-        # self.setTabOrder(self.Slider8, self.Slider9)
-        # self.setTabOrder(self.Slider9, self.Slider10)
-        # self.setTabOrder(self.Slider10, self.OriginalSignalViewer)
-        # self.setTabOrder(self.OriginalSignalViewer, self.EditedSignalViewer)
-        # self.setTabOrder(self.EditedSignalViewer, self.SpectrogramViewer)
 
-    def fn_slider1Value(self, value1=1):
-        self._value1 = value1
-        self.process()
-
-    def fn_slider2Value(self, value2=1):
-        self._value2 = value2
-        self.process()
-
-    def fn_slider3Value(self, value3=1):
-        self._value3 = value3
-        self.process()
-
-    def fn_slider4Value(self, value4=1):
-        self._value4 = value4
-        self.process()
-
-    def fn_slider5Value(self, value5=1):
-        self._value5 = value5
-        self.process()
-  
-    def fn_slider6Value(self, value6=1):
-        self._value6 = value6
-        self.process()
-
-    def fn_slider7Value(self, value7=1):
-        self._value7 = value7
-        self.process()
-
-    def fn_slider8Value(self, value8=1):
-        self._value8 = value8
-        self.process()
-
-    def fn_slider9Value(self, value9=1):
-        self._value9 = value9
-        self.process()
-  
-    def fn_slider10Value(self, value10=1):
-        self._value10 = value10
+    def fn_sliderValue(self,value):
+        objectName = str(self.sender().objectName())
+        sliderNumber = re.search("[0-9]+",objectName).group()
+        setattr(self,"_value" + sliderNumber,value)
         self.process()
 
     def process(self): #(freq,complex_data,reals,time,np.abs(complex_data))
@@ -336,8 +307,8 @@ class centralWidget(QtWidgets.QWidget) :
         self.EditedSignalViewer.clear()
         self.plot1 = self.EditedSignalViewer.addPlot()
         self.plot1.plot(self.timeData,reals)
-        self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1])
-        self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1])
+        self.plot1.setXRange(self.xRangeOfSignal[0],self.xRangeOfSignal[1],0)
+        self.plot1.setYRange(self.yRangeOfSignal[0],self.yRangeOfSignal[1],0)
         self.editedVoltsData = np.array(reals)
         # update spectrogram 
         self.SpectrogramViewer.clear()

@@ -46,7 +46,7 @@ class fourierTransform() :
         real_data = list(invrs.real) #sound file data
         return real_data
     
-    def deleteRangeOfFrequancy(self,min,max) : 
+    def deleteRangeOfFrequancy(self,min,max) :
         numbersOfData = len(self.data_fft)
         for j in range(min,max + 1) :
                 self.data_fft[j] = self.data_fft[j] * 0.0
